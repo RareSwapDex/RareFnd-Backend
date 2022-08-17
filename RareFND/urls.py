@@ -15,9 +15,43 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from django.urls import include
+from django.urls import include, re_path
+from RareFndApp import views, tasks
+from rest_framework import routers
+from django.views.static import serve
+from django.conf import settings
+import threading
+from rest_framework_simplejwt.views import (
+    TokenRefreshView,
+)
+from RareFndApp.serializers import MyTokenObtainPairView
+from django_email_verification import urls as email_urls 
+
+
+t1 = threading.Thread(target=tasks.start_tasks)
+t1.start()
+
+router = routers.DefaultRouter()
+
+# register the router
+# router.register('project/',views.projects_list)
+# router.register(r'category',views.CategorytView, 'category')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('RareFndApp.urls'))
+    path('api/user/signup/', views.signup_user),
+    path('api/user/verify_email/', include(email_urls)),
+    path('api/unique/<str:field_to_check>/<str:field_value>/',views.unique_username),
+    path('api/project/category/<str:category_name>/',views.projects_from_category),
+    path('api/contribution/',views.contributions_list),
+    path('api/pending_contribution/',views.pending_contributions_list),
+    path('api/project/',views.projects_list),
+    path('api/category/',views.categories_list),
+    path('api/price/',views.token_price),
+    path('api/project/<int:id>/',views.projects_details),
+    path('', include('RareFndApp.urls')),
+    path('tinymce/', include('tinymce.urls')),
+    re_path(r'^files/(?P<path>.*)$', serve, { 'document_root': settings.MEDIA_ROOT, }),
+    path('api/auth/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
