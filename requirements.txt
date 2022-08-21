@@ -67,6 +67,7 @@ parsimonious==0.8.1
 phonenumbers==8.12.54
 protobuf==3.20.1
 psutil==5.9.1
+psycopg2-binary==2.9.3
 py-ecc==5.2.0
 py-evm==0.5.0a3
 py-geth==3.8.0
