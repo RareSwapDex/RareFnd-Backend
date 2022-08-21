@@ -31,7 +31,7 @@ def start_tasks():
         except Exception:
             print(traceback.format_exc())
         try:
-            print(get_fnd_usd_value(FND, BNB, BUSD, FND_BNB, router_pancake_swap))
+            get_fnd_usd_value(FND, BNB, BUSD, FND_BNB, router_pancake_swap)
         except Exception:
             print(traceback.format_exc())
         time.sleep(5)
