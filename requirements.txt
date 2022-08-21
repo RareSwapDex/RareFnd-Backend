@@ -64,6 +64,7 @@ netaddr==0.8.0
 packaging==21.3
 pandocfilters==1.5.0
 parsimonious==0.8.1
+phonenumbers==8.12.54
 protobuf==3.20.1
 psutil==5.9.1
 py-ecc==5.2.0
