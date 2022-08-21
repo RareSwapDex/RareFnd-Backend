@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-z27p4p4(jf+k#%8+6&=%9ggt-b&4^5ro^m!tl6&ab-tnrlo_k-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['https://rarefndapi.herokuapp.com', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['rarefndapi.herokuapp.com', '127.0.0.1', 'localhost']
 
 
 # Application definition
