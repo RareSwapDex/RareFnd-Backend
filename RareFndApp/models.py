@@ -3,6 +3,8 @@ from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from ckeditor.fields import RichTextField
 from django.contrib.auth.models import AbstractUser
+from django.contrib.postgres.fields import ArrayField
+import json
 
 
 class User(AbstractUser):
@@ -92,6 +94,22 @@ class Project(models.Model):
     
     def __str__(self):
         return self.title
+
+
+class Incentive(models.Model):
+    title = models.CharField(max_length=50, null=False, blank=False)
+    description = models.TextField(max_length=254, null=False, blank=False)
+    included_incentives = models.CharField(max_length=1000, null=True, blank=True)
+    estimated_delivery = models.DateField(null=False, blank=False)
+    available_items = models.IntegerField(null=False, blank=False)
+    price = models.FloatField(null=False, blank=False)
+    reserved = models.IntegerField(blank=True)
+    project = models.ForeignKey(Project, null=False, blank=False, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return self.title
+    
+
 
 class Contribution(models.Model):
     contributor_wallet_address = models.CharField(max_length=254, null=True, blank=True)

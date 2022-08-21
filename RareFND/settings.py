@@ -58,21 +58,21 @@ def verified_callback(user):
 
 
 EMAIL_VERIFIED_CALLBACK = verified_callback
-EMAIL_FROM_ADDRESS = 'rarefnd@rarefnd.com'
+EMAIL_FROM_ADDRESS = 'support@rarefnd.com'
 EMAIL_MAIL_SUBJECT = 'Confirm your email {{ user.username }}'
 EMAIL_MAIL_HTML = 'email_verification.html'
 EMAIL_MAIL_PLAIN = 'email_verification_plain.txt'
 EMAIL_TOKEN_LIFE = 60 * 60
-EMAIL_PAGE_TEMPLATE = 'email_verification_page_template.html'
-EMAIL_PAGE_DOMAIN = 'localhost:3000'
+EMAIL_PAGE_TEMPLATE = 'email_verificationcheck_token.html'
+EMAIL_PAGE_DOMAIN = 'http://localhost:8000'
 EMAIL_MULTI_USER = True  # optional (defaults to False)
 
 # For Django Email Backend
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.office365.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'benharkatdjalil@gmail.com'
-EMAIL_HOST_PASSWORD = 'vdpwltnonxyejysa'  # os.environ['password_key'] suggested
+EMAIL_HOST_USER = 'support@rarefnd.com'
+EMAIL_HOST_PASSWORD = '@Beastmode9294'  # os.environ['password_key'] suggested
 EMAIL_USE_TLS = True
 
 

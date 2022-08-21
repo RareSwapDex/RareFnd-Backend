@@ -1,11 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<title>Confirmation</title>
-	</head>
-	<body>
-		{% if success %} {{ user.username }}, your account is confirmed! {% else %}
-		Error, invalid token! {% endif %}
-	</body>
-</html>
+<h2>RareFnd: You are almost there, {{ user.username }}!</h2>
+<br />
+<h3>Please click <a href="{{ link }}">here</a> to confirm your account</h3>
+<a href="{{ link }}">{{ link }}</a>
+<h3>The token expires on {{ expiry|time:"TIME_FORMAT" }} UTC</h3>

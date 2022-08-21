@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from rest_framework import viewsets
-from .serializers import ProjectSerializer, CategorySerializer, ContributionSerializer, PendingContributionSerializer, TokenPriceSerializer, UserSerializer
-from .models import Project, Category, Contribution, PendingContribution, TokenPrice, User
+from .serializers import ProjectSerializer, CategorySerializer, ContributionSerializer, PendingContributionSerializer, TokenPriceSerializer, UserSerializer, IncentiveSerializer
+from .models import Project, Category, Contribution, PendingContribution, TokenPrice, User, Incentive
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -13,14 +13,14 @@ import smtplib
 
 
 
-# username='jalil@therat.finance'
+# username='support@rarefnd.com'
 # password='@Beastmode9294'
 # mailserver = smtplib.SMTP('smtp.office365.com',587)
 # mailserver.ehlo()
 # mailserver.starttls()
 # mailserver.login(username, password)
 # #Adding a newline before the body text fixes the missing message body
-# mailserver.sendmail('user@company.co','user@company.co','\npython email')
+# mailserver.sendmail('support@rarefnd.com','benharkatdjalil@gmail.com','\npython email')
 # mailserver.quit()
 
 
@@ -148,3 +148,11 @@ def signup_user(request):
             send_email(request.data["username"])
             return Response(status=status.HTTP_200_OK)
         print(serializer.errors)
+        
+@api_view(['GET'])
+def incentives(request, project_id):
+    if request.method == 'GET':        
+        queryset = Incentive.objects.filter(project__id=project_id)
+        # queryset = Incentive.objects.all()
+        serializer = IncentiveSerializer(queryset, many=True)
+        return Response({"incentives": serializer.data}, status=status.HTTP_200_OK)
