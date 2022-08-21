@@ -114,3 +114,4 @@ websockets==9.1
 whitenoise==6.2.0
 yarl==1.8.1
 zipp==3.8.1
+Pillow==9.0.0

@@ -38,7 +38,7 @@ export default function ContributeBtn(props) {
 
 	useEffect(() => {
 		axios
-			.get(`http://c503-94-202-120-29.ngrok.io/api/project/${id}/`)
+			.get(`https://rarefndapi.herokuapp.com/api/project/${id}/`)
 			.then((response) => {
 				setProjectData(response.data);
 			});
@@ -77,7 +77,7 @@ export default function ContributeBtn(props) {
 						ethers.utils.parseEther(contribution_amount)
 					);
 					axios.post(
-						"http://c503-94-202-120-29.ngrok.io/api/pending_contribution/",
+						"https://rarefndapi.herokuapp.com/api/pending_contribution/",
 						{
 							hash: tx.hash,
 							project: id,
