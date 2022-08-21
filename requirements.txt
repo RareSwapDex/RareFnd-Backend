@@ -1,4 +1,4 @@
-web3==
+web3
 Django==4.1
 django_email_verification==0.2.2
 djangorestframework==3.13.1
