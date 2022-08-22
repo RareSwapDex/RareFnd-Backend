@@ -141,13 +141,28 @@ def unique_username(request, field_to_check, field_value):
 @api_view(['POST'])
 def signup_user(request):
     if request.method == 'POST':
-        print(request.data)
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            send_email(request.data["username"])
-            return Response(status=status.HTTP_200_OK)
-        print(serializer.errors)
+        try:
+            unverifiedUser = get_user_model().objects.create(username= request.data['username'], password=request.data['password'], 
+                                                email=request.data['email'],first_name= request.data['firstname'],
+                                                last_name= request.data['lastname'], phone= request.data['phone'], 
+                                                    wallet_address= request.data['walletAddress'])
+            unverifiedUser.is_active = False
+            try:
+                send_email(unverifiedUser)
+                return Response(status=status.HTTP_200_OK)
+            except Exception:
+                print(traceback.format_exc())
+                return Response({"errors": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"errors": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+       
+        # print(request.data)
+        # serializer = UserSerializer(data=request.data)
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     send_email(request.data["username"])
+        #     return Response(status=status.HTTP_200_OK)
+        # print(serializer.errors)
         
 @api_view(['GET'])
 def incentives(request, project_id):
