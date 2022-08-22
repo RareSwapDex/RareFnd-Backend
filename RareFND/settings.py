@@ -64,7 +64,7 @@ EMAIL_MAIL_HTML = 'email_verification.html'
 EMAIL_MAIL_PLAIN = 'email_verification_plain.txt'
 EMAIL_TOKEN_LIFE = 60 * 60
 EMAIL_PAGE_TEMPLATE = 'email_verificationcheck_token.html'
-EMAIL_PAGE_DOMAIN = 'http://localhost:8000'
+EMAIL_PAGE_DOMAIN = 'https://rarefndapi.herokuapp.com'
 EMAIL_MULTI_USER = True  # optional (defaults to False)
 
 # For Django Email Backend
