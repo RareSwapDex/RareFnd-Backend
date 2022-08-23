@@ -71,8 +71,8 @@ EMAIL_MULTI_USER = True  # optional (defaults to False)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.office365.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'support@rarefnd.com'
-EMAIL_HOST_PASSWORD = '@Beastmode9294'  # os.environ['password_key'] suggested
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''  # os.environ['password_key'] suggested
 EMAIL_USE_TLS = True
 
 
