@@ -11,6 +11,7 @@ from .serializers import (
     IncentiveSerializer,
     SubCategorySerializer,
     CountrySerializer,
+    RareFndDataSerializer,
 )
 from .models import (
     Project,
@@ -22,6 +23,7 @@ from .models import (
     Incentive,
     Subcategory,
     Country,
+    RareFndData,
 )
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -217,3 +219,11 @@ def incentives(request, project_id):
         queryset = Incentive.objects.filter(project__id=project_id)
         serializer = IncentiveSerializer(queryset, many=True)
         return Response({"incentives": serializer.data}, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+def incentives(request):
+    if request.method == "GET":
+        queryset = RareFndData.objects.all()[0]
+        serializer = RareFndDataSerializer(queryset)
+        return Response(serializer.data, status=status.HTTP_200_OK)

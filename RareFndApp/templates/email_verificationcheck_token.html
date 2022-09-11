@@ -5,7 +5,10 @@
 		<title>Confirmation</title>
 	</head>
 	<body>
-		{% if success %} {{ user.username }}, your account is confirmed! {% else %}
-		Error, invalid token! {% endif %}
+		{% if success %}
+		<h1>{{ user.username }}, your email is confirmed!</h1>
+		{% else %}
+		<h1>Error, invalid token!</h1>
+		{% endif %}
 	</body>
 </html>

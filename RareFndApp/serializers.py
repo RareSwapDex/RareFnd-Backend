@@ -12,6 +12,7 @@ from .models import (
     TokenPrice,
     User,
     Incentive,
+    RareFndData,
 )
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -150,4 +151,10 @@ class SubCategorySerializer(serializers.ModelSerializer):
 class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
+        fields = "__all__"
+
+
+class RareFndDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RareFndData
         fields = "__all__"

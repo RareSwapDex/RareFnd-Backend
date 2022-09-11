@@ -89,12 +89,6 @@ class User(AbstractBaseUser):
         # Simplest possible answer: All admins are staff
         return self.is_admin
 
-    # def save(self, *args, **kwargs):
-    #     user = super(User, self)
-    #     user.set_password(self.password)
-    #     user.save(*args, **kwargs)
-    #     return user
-
 
 def get_category_files_directory(instance, filename):
     return f"projects/{instance.name}/{filename}"
@@ -154,9 +148,6 @@ class Project(models.Model):
         upload_to=get_project_files_directory,
     )
     files = models.FileField(
-        blank=False,
-        null=False,
-        default="help.jpg",
         upload_to=get_project_files_directory,
     )
     type = models.ForeignKey(Type, null=True, blank=False, on_delete=models.SET_NULL)
@@ -181,6 +172,12 @@ class Project(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class RareFndData(models.Model):
+    white_paper = models.FileField(
+        upload_to=get_project_files_directory,
+    )
 
 
 class Incentive(models.Model):

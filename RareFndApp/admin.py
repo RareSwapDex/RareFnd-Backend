@@ -11,6 +11,7 @@ from RareFndApp.models import (
     PendingContribution,
     TokenPrice,
     Incentive,
+    RareFndData,
 )
 from django import forms
 from django.contrib import admin
@@ -160,3 +161,4 @@ admin.site.register(Country)
 admin.site.register(PendingContribution)
 admin.site.register(TokenPrice)
 admin.site.register(Incentive)
+admin.site.register(RareFndData)
