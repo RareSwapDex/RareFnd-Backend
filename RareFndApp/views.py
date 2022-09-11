@@ -222,7 +222,7 @@ def incentives(request, project_id):
 
 
 @api_view(["GET"])
-def incentives(request):
+def get_rare_fnd_data(request):
     if request.method == "GET":
         queryset = RareFndData.objects.all()[0]
         serializer = RareFndDataSerializer(queryset)
