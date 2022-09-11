@@ -1,4 +1,4 @@
-RareFND/DB
-RareFND/PostgreSQL
-RareFND/files
-RareFND/db.sqlite3
+DB
+PostgreSQL
+files
+db.sqlite3
