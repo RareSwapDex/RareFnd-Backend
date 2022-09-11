@@ -1,2 +1,4 @@
-DB
-dump.json
+RareFND/DB
+RareFND/PostgreSQL
+RareFND/files
+RareFND/db.sqlite3
