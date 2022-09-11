@@ -174,9 +174,13 @@ class Project(models.Model):
         return self.title
 
 
+def get_rare_fnd_data_files_directory(instance, filename):
+    return f"RareFndData/{filename}"
+
+
 class RareFndData(models.Model):
     white_paper = models.FileField(
-        upload_to=get_project_files_directory,
+        upload_to=get_rare_fnd_data_files_directory,
     )
 
 
