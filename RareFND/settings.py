@@ -238,6 +238,9 @@ AWS_ACCESS_KEY_ID = "AKIATCFZ6A4SVN5M5FON"
 # https://rarefnd-bucket.s3.amazonaws.com/categories/Publishing/books-gac7e075de_1280_JTknTcf.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIATCFZ6A4SVN5M5FON%2F20220912%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20220912T012735Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=5055e08bd75a3717040b1684e6423857ca89c2a6c4016be7e7a95df8e14d50e8
 # https://rarefnd-bucket.s3.amazonaws.com/categories/Publishing/books-gac7e075de_1280_JTknTcf.jpg?AWSAccessKeyId=AKIATCFZ6A4SVN5M5FON&Signature=iaBKj8Ru4ITIgM8eHRXpXprOO%2Bs%3D&Expires=1662949797
 # https://rarefnd-bucket.s3.amazonaws.com/categories/Publishing/books-gac7e075de_1280_JTknTcf.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIATCFZ6A4SVN5M5FON%2F20220912%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20220912T013203Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=e5be133e8339ee49ddcd43d9495ba7341184a1ff9daf943d175e70edee3380ce
+https://rarefnd-bucket.s3.amazonaws.com/categories/Publishing/books-gac7e075de_1280.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIATCFZ6A4SVN5M5FON%2F20220912%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20220912T020028Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=a0951d584edc7a88cdc59a76e5f2e2b3845ad6333186cfd3b0cac23644e4414b
+https://rarefnd-bucket.s3.amazonaws.com/categories/Publishing/books-gac7e075de_1280.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIATCFZ6A4SVN5M5FON%2F20220912%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20220912T015950Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=b9eb7462eefd128c9e1f17e44540f192c2e0520a50015b9c93048f1f52755ada
+https://rarefnd-bucket.s3.amazonaws.com/categories/Publishing/books-gac7e075de_1280.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIATCFZ6A4SVN5M5FON%2F20220912%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20220912T020104Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=c8700ec7b3fddcf01e1902b1fa58151e19dbb9da555f4e096c6b7dc4c249885d
 AWS_SECRET_ACCESS_KEY = "3Wz5CeyE95//5KtiJuoTNGmadBbZJAWQfbOjezwz"
 AWS_STORAGE_BUCKET_NAME = "rarefnd-bucket"
 AWS_S3_FILE_OVERWRITE = False
@@ -245,5 +248,5 @@ AWS_DEFAULT_ACL = None
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 # STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
-AWS_S3_REGION_NAME = "ap-south-1"
+AWS_S3_REGION_NAME = "us-east-2"
 AWS_S3_SIGNATURE_VERSION = "s3v4"
