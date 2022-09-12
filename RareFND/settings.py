@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "django_email_verification",
+    "storages",
 ]
 
 
@@ -231,3 +232,12 @@ TEMPLATE_DIRS = (os.path.join(BASE_DIR, "/RareFndApp/templates"),)
 #     'http://localhost:3000',
 #     'https://main--chic-sopapillas-1becfe.netlify.app'
 # )
+
+# S3 BUCKETS CONFIG
+AWS_ACCESS_KEY_ID = "AKIATCFZ6A4SVN5M5FON"
+AWS_SECRET_ACCESS_KEY = "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"
+AWS_STORAGE_BUCKET_NAME = "rarefnd-bucket"
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"

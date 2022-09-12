@@ -2,6 +2,7 @@ from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from ckeditor.fields import RichTextField
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from django.core.validators import FileExtensionValidator
 
 
 class UserManager(BaseUserManager):
@@ -91,7 +92,7 @@ class User(AbstractBaseUser):
 
 
 def get_category_files_directory(instance, filename):
-    return f"projects/{instance.name}/{filename}"
+    return f"categories/{instance.name}/{filename}"
 
 
 class Category(models.Model):
@@ -148,6 +149,7 @@ class Project(models.Model):
         upload_to=get_project_files_directory,
     )
     files = models.FileField(
+        # validators=[FileExtensionValidator(allowed_extensions=["jpeg", "png", "jpg"])]
         upload_to=get_project_files_directory,
     )
     type = models.ForeignKey(Type, null=True, blank=False, on_delete=models.SET_NULL)
@@ -175,7 +177,7 @@ class Project(models.Model):
 
 
 def get_rare_fnd_data_files_directory(instance, filename):
-    return f"RareFndData/{filename}"
+    return f"RareFNDData/{filename}"
 
 
 class RareFndData(models.Model):
