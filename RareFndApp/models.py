@@ -61,7 +61,9 @@ class User(AbstractBaseUser):
     first_name = models.CharField(null=True, blank=True, max_length=50)
     last_name = models.CharField(null=True, blank=True, max_length=50)
     phone = PhoneNumberField(null=True, blank=True)
-    wallet_address = models.CharField(max_length=254, null=False, blank=False)
+    wallet_address = models.CharField(
+        max_length=254, null=True, blank=True, default="No Wallet Address"
+    )
     creation_datetime = models.DateTimeField(auto_now_add=True)
     total_contributions = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
