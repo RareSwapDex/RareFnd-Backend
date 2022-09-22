@@ -29,7 +29,7 @@ from django_email_verification import urls as email_urls
 
 
 t1 = threading.Thread(target=tasks.start_tasks)
-t1.start()
+# t1.start()
 
 router = routers.DefaultRouter()
 
@@ -45,6 +45,7 @@ urlpatterns = [
     path("api/rarefnd/data/", views.get_rare_fnd_data),
     path("api/unique/<str:field_to_check>/<str:field_value>/", views.unique_username),
     path("api/project/category/<str:category_name>/", views.projects_from_category),
+    path("api/project/add/", views.add_project),
     path(
         "api/category/<str:category_name>/subcategories/",
         views.subcategories_list_of_category,

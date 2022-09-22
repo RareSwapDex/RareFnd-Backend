@@ -37,29 +37,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     # create a meta class
     class Meta:
         model = Project
-        fields = [
-            "id",
-            "owner",
-            "title",
-            "head",
-            "description",
-            "thumbnail",
-            "description",
-            "type",
-            "category",
-            "subcategory",
-            "country",
-            "address",
-            "creation_datetime",
-            "fund_amount",
-            "raised_amount",
-            "rewarded_amount",
-            "staking_address",
-            "staking_abi",
-            "deadline",
-            "aproved",
-            "live",
-        ]
+        fields = "__all__"
 
 
 class CategorySerializer(serializers.ModelSerializer):

@@ -97,6 +97,17 @@ def projects_details(request, id):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(["POST"])
+def add_project(request):
+    if request.method == "POST":
+        print(request.data)
+        # serializer = ProjectSerializer(data=request.data)
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     return Response(status=status.HTTP_201_CREATED)
+        # print(serializer.errors)
+
+
 @api_view(["GET"])
 def countries_list(request):
     if request.method == "GET":
