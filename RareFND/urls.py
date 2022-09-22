@@ -29,7 +29,7 @@ from django_email_verification import urls as email_urls
 
 
 t1 = threading.Thread(target=tasks.start_tasks)
-# t1.start()
+t1.start()
 
 router = routers.DefaultRouter()
 

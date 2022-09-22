@@ -1,3 +1,4 @@
+from pprint import pprint
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from rest_framework import viewsets
@@ -33,6 +34,7 @@ import traceback
 from django.contrib.auth import get_user_model
 import smtplib
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.decorators import login_required
 
 
 # username='support@rarefnd.com'
@@ -98,14 +100,55 @@ def projects_details(request, id):
 
 
 @api_view(["POST"])
+@login_required
 def add_project(request):
     if request.method == "POST":
-        print(request.data)
-        # serializer = ProjectSerializer(data=request.data)
+        print("************************", request.user)
+        print(request.headers)
+        pprint(request.data)
+
+        project = Project(owner=request.user, projectData=request.data)
+        project.clean()
+        project.save()
+        return Response(status=status.HTTP_201_CREATED)
         # if serializer.is_valid():
         #     serializer.save()
         #     return Response(status=status.HTTP_201_CREATED)
         # print(serializer.errors)
+
+        # project_data = {
+        #     "title": request.data["basics"]["projectTitle"] or None,
+        #     "head": request.data["basics"]["projectHead"] or None,
+        #     "country": request.data["basics"]["projectCountry"] or None,
+        #     "address": request.data["basics"]["projectAddress"] or None,
+        #     "launch_date": request.data["projectLaunchDate"] or None,
+        #     "deadline": request.data["projectDeadlineDate"] or None,
+        #     "category": request.data["projectCategory"] or None,
+        #     "subcategory": request.data["subcategory"] or None,
+        #     "type": request.data["type"] or None,
+        #     "fund_amount": request.data["fund_amount"] or None,
+        #     "description": request.data["description"] or None,
+        #     "company_name": request.data["company_name"] or None,
+        #     "company_nature_of_business": request.data["company_nature_of_business"]
+        #     or None,
+        #     "company_address": request.data["company_address"] or None,
+        #     "company_city": request.data["company_city"] or None,
+        #     "company_zip_code": request.data["company_zip_code"] or None,
+        #     "company_country": request.data["company_country"] or None,
+        #     "company_incorporation_date": request.data["company_incorporation_date"]
+        #     or None,
+        #     "company_registration_number": request.data["company_registration_number"]
+        #     or None,
+        #     "company_estimated_annual_turnover": request.data[
+        #         "company_estimated_annual_turnover"
+        #     ]
+        #     or None,
+        #     "company_tax_country": request.data["title"] or None,
+        #     "company_tax_identification_number": request.data["title"] or None,
+        #     "company_white_paper_url": request.data["title"] or None,
+        #     "company_tokenomics_url": request.data["title"] or None,
+        #     "company_ubos": request.data["title"] or None,
+        # }
 
 
 @api_view(["GET"])
