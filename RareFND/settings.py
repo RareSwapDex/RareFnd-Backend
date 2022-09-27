@@ -165,8 +165,8 @@ DATABASES = {
     # "default": {
     #     "ENGINE": "django.db.backends.postgresql",
     #     "NAME": "postgres",
-    #     "USER": "rarefnd_admin",
-    #     "PASSWORD": "RareFndThaBast",
+    #     "USER": "rarefnd",
+    #     "PASSWORD": "rarefnd",
     #     "HOST": "localhost",
     #     "PORT": "5432",
     # }

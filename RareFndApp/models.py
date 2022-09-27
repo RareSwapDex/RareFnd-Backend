@@ -137,81 +137,88 @@ class Country(models.Model):
 
 
 def get_project_files_directory(instance, filename):
-    return f"projects/{instance.title}/{filename}"
+    if type(instance) is Project:
+        return f"projects/{instance.id}/{instance.title}/{filename}"
+    elif type(instance) is ProjectFile:
+        return f"projects/{instance.owner.id}/{instance.owner.title}/{filename}"
 
 
 class Project(models.Model):
+    # Basics
     owner = models.ForeignKey(User, null=True, blank=False, on_delete=models.SET_NULL)
-    projectData = JSONField(default=dict)
+    title = models.CharField(max_length=254, null=True, blank=False)
+    head = models.TextField(max_length=280, null=True, blank=False)
+    country = models.CharField(max_length=254, null=True, blank=False)
+    address = models.CharField(max_length=254, null=True, blank=False)
+    thumbnail = models.ImageField(
+        blank=False,
+        null=True,
+        default="help.jpg",
+        upload_to=get_project_files_directory,
+    )
+    creation_datetime = models.DateTimeField(null=True, auto_now_add=True)
+    launch_date = models.DateTimeField(null=True, default=None)
+    deadline = models.DateTimeField(null=True, default=None)
+    category = models.ForeignKey(
+        Category, null=True, blank=False, on_delete=models.SET_NULL
+    )
+    subcategory = models.ForeignKey(Subcategory, null=True, on_delete=models.SET_NULL)
+    type = models.ForeignKey(Type, null=True, blank=False, on_delete=models.SET_NULL)
+    # Funding
+    fund_amount = models.FloatField(null=True, blank=False)
+    # Story
+    description = RichTextField(max_length=10000, null=True, blank=False)
+    # Payment
+    company_name = models.CharField(max_length=254, null=True, blank=False)
+    company_nature_of_business = models.CharField(
+        max_length=254, null=True, blank=False
+    )
+    company_address = models.CharField(max_length=254, null=True, blank=False)
+    company_city = models.CharField(max_length=254, null=True, blank=False)
+    company_zip_code = models.CharField(max_length=254, null=True, blank=False)
+    company_country = models.CharField(max_length=254, null=True, blank=False)
+    company_incorporation_date = models.DateTimeField(null=True, default=None)
+    company_registration_number = models.CharField(
+        max_length=254, null=True, blank=False
+    )
+    company_estimated_annual_turnover = models.CharField(
+        max_length=254, null=True, blank=False
+    )
+    company_tax_country = models.CharField(max_length=254, null=True, blank=False)
+    company_tax_identification_number = models.CharField(
+        max_length=254, null=True, blank=False
+    )
+    company_white_paper_url = models.CharField(max_length=1000, null=True, blank=False)
+    company_tokenomics_url = models.CharField(max_length=1000, null=True, blank=False)
+    company_ubos = JSONField(null=True, default=dict)
 
-    # # Basics
-    # owner = models.ForeignKey(User, null=True, blank=False, on_delete=models.SET_NULL)
-    # title = models.CharField(max_length=254, null=True, blank=False)
-    # head = models.TextField(max_length=280, null=True, blank=False)
-    # country = models.CharField(max_length=254, null=True, blank=False)
-    # address = models.CharField(max_length=254, null=True, blank=False)
-    # thumbnail = models.ImageField(
-    #     blank=False,
-    #     null=True,
-    #     default="help.jpg",
-    #     upload_to=get_project_files_directory,
-    # )  ##########
-    # creation_datetime = models.DateTimeField(auto_now_add=True)
-    # launch_date = models.DateTimeField()
-    # deadline = models.DateTimeField()
-    # category = models.ForeignKey(
-    #     Category, null=True, blank=False, on_delete=models.SET_NULL
-    # )
-    # subcategory = models.ForeignKey(Subcategory, null=True, on_delete=models.SET_NULL)
-    # type = models.ForeignKey(Type, null=True, blank=False, on_delete=models.SET_NULL)
-    # # Funding
-    # fund_amount = models.FloatField(null=True, blank=False)
-    # # Story
-    # description = RichTextField(max_length=10000, null=True, blank=False)
-    # # Payment
-    # company_name = models.CharField(max_length=254, null=True, blank=False)
-    # company_nature_of_business = models.CharField(
-    #     max_length=254, null=True, blank=False
-    # )
-    # company_address = models.CharField(max_length=254, null=True, blank=False)
-    # company_city = models.CharField(max_length=254, null=True, blank=False)
-    # company_zip_code = models.CharField(max_length=254, null=True, blank=False)
-    # company_country = models.CharField(max_length=254, null=True, blank=False)
-    # company_incorporation_date = models.DateTimeField(default=None)
-    # company_registration_number = models.CharField(
-    #     max_length=254, null=True, blank=False
-    # )
-    # company_estimated_annual_turnover = models.CharField(
-    #     max_length=254, null=True, blank=False
-    # )
-    # company_tax_country = models.CharField(max_length=254, null=True, blank=False)
-    # company_tax_identification_number = models.CharField(
-    #     max_length=254, null=True, blank=False
-    # )
-    # company_white_paper_url = models.CharField(max_length=1000, null=True, blank=False)
-    # company_tokenomics_url = models.CharField(max_length=1000, null=True, blank=False)
-    # company_ubos = JSONField(default=dict)
+    raised_amount = models.FloatField(null=True, blank=True, default=0)
+    rewarded_amount = models.FloatField(null=True, blank=True, default=0)
+    staking_address = models.CharField(max_length=254, null=True, blank=True)
+    staking_abi = models.TextField(max_length=10000, null=True, blank=True)
+    approved = models.BooleanField(default=False)
+    live = models.BooleanField(default=False)
+    project_live_datetime = models.DateTimeField(null=True, default=None, blank=True)
 
-    # # Files
-    # files = models.FileField(
-    #     validators=[
-    #         FileExtensionValidator(
-    #             allowed_extensions=["gif", "png", "jpg", "jpeg", "xlsx", "csv", "pdf"]
-    #         )
-    #     ],
-    #     upload_to=get_project_files_directory,
-    # )
+    def __str__(self):
+        return self.title
 
-    # raised_amount = models.FloatField(null=True, blank=False, default=0)
-    # rewarded_amount = models.FloatField(null=True, blank=False, default=0)
-    # staking_address = models.CharField(max_length=254, null=True, blank=False)
-    # staking_abi = models.TextField(max_length=10000, null=True, blank=False)
-    # aproved = models.BooleanField(default=False)
-    # live = models.BooleanField(default=False)
-    # project_live_datetime = models.DateTimeField(null=True, default=None, blank=True)
 
-    # def __str__(self):
-    #     return self.title
+class ProjectFile(models.Model):
+    owner = models.ForeignKey(
+        Project, null=True, blank=False, on_delete=models.SET_NULL
+    )
+    file = models.FileField(
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=["gif", "png", "jpg", "jpeg", "xlsx", "csv", "pdf"]
+            )
+        ],
+        upload_to=get_project_files_directory,
+    )
+
+    def __str__(self):
+        return f"{self.owner} | {self.file}"
 
 
 def get_rare_fnd_data_files_directory(instance, filename):
@@ -227,11 +234,11 @@ class RareFndData(models.Model):
 class Incentive(models.Model):
     title = models.CharField(max_length=50, null=False, blank=False)
     description = models.TextField(max_length=254, null=False, blank=False)
-    included_incentives = models.CharField(max_length=1000, null=True, blank=True)
-    estimated_delivery = models.DateField(null=False, blank=False)
+    included_incentives = JSONField(null=True, default=list)
+    estimated_delivery = models.DateTimeField(null=False, blank=False)
     available_items = models.IntegerField(null=False, blank=False)
     price = models.FloatField(null=False, blank=False)
-    reserved = models.IntegerField(blank=True)
+    reserved = models.IntegerField(blank=True, default=0)
     project = models.ForeignKey(
         Project, null=False, blank=False, on_delete=models.CASCADE
     )

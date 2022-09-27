@@ -1,7 +1,8 @@
 from pprint import pprint
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from rest_framework import viewsets
+from django.core.files.images import ImageFile, File
+import io
 from .serializers import (
     ProjectSerializer,
     CategorySerializer,
@@ -25,6 +26,8 @@ from .models import (
     Subcategory,
     Country,
     RareFndData,
+    ProjectFile,
+    Type,
 )
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -103,52 +106,108 @@ def projects_details(request, id):
 @login_required
 def add_project(request):
     if request.method == "POST":
-        print("************************", request.user)
-        print(request.headers)
-        pprint(request.data)
-
-        project = Project(owner=request.user, projectData=request.data)
-        project.clean()
-        project.save()
-        return Response(status=status.HTTP_201_CREATED)
-        # if serializer.is_valid():
-        #     serializer.save()
-        #     return Response(status=status.HTTP_201_CREATED)
-        # print(serializer.errors)
-
-        # project_data = {
-        #     "title": request.data["basics"]["projectTitle"] or None,
-        #     "head": request.data["basics"]["projectHead"] or None,
-        #     "country": request.data["basics"]["projectCountry"] or None,
-        #     "address": request.data["basics"]["projectAddress"] or None,
-        #     "launch_date": request.data["projectLaunchDate"] or None,
-        #     "deadline": request.data["projectDeadlineDate"] or None,
-        #     "category": request.data["projectCategory"] or None,
-        #     "subcategory": request.data["subcategory"] or None,
-        #     "type": request.data["type"] or None,
-        #     "fund_amount": request.data["fund_amount"] or None,
-        #     "description": request.data["description"] or None,
-        #     "company_name": request.data["company_name"] or None,
-        #     "company_nature_of_business": request.data["company_nature_of_business"]
-        #     or None,
-        #     "company_address": request.data["company_address"] or None,
-        #     "company_city": request.data["company_city"] or None,
-        #     "company_zip_code": request.data["company_zip_code"] or None,
-        #     "company_country": request.data["company_country"] or None,
-        #     "company_incorporation_date": request.data["company_incorporation_date"]
-        #     or None,
-        #     "company_registration_number": request.data["company_registration_number"]
-        #     or None,
-        #     "company_estimated_annual_turnover": request.data[
-        #         "company_estimated_annual_turnover"
-        #     ]
-        #     or None,
-        #     "company_tax_country": request.data["title"] or None,
-        #     "company_tax_identification_number": request.data["title"] or None,
-        #     "company_white_paper_url": request.data["title"] or None,
-        #     "company_tokenomics_url": request.data["title"] or None,
-        #     "company_ubos": request.data["title"] or None,
-        # }
+        try:
+            project = Project(
+                owner=request.user,
+                title=request.data.get("basics.projectTitle"),
+                head=request.data.get("basics.projectHead"),
+                country=request.data.get("basics.projectCountry"),
+                address=request.data.get("basics.projectAddress"),
+                thumbnail=ImageFile(
+                    io.BytesIO(request.data.get("basics.projectImageFile").read()),
+                    name="thumbnail.jpg",
+                ),
+                launch_date=request.data.get("basics.projectLaunchDate"),
+                deadline=request.data.get("basics.projectDeadlineDate"),
+                category=Category.objects.get(
+                    name=request.data.get("basics.projectCategory")
+                ).id,
+                subcategory=Subcategory.objects.get(
+                    name=request.data.get("basics.projectSubcategory")
+                ).id,
+                type_id=Type.objects.get(
+                    name=request.data.get("basics.projectType")
+                ).id,
+                fund_amount=request.data.get("funding.projectFundsAmount"),
+                description=request.data.get("story.projectStory"),
+                company_name=request.data.get("payment.companyName"),
+                company_nature_of_business=request.data.get("payment.natureOfBusiness"),
+                company_address=request.data.get("payment.companyAddress"),
+                company_city=request.data.get("payment.companyCity"),
+                company_zip_code=request.data.get("payment.companyZipCode"),
+                company_country=request.data.get("payment.projectTaxCountry"),
+                company_incorporation_date=request.data.get(
+                    "payment.projectIncorporationDate"
+                ),
+                company_registration_number=request.data.get(
+                    "payment.companyRegistrationNumber"
+                ),
+                company_estimated_annual_turnover=request.data.get(
+                    "payment.companyEstimatedAnnualTurnover"
+                ),
+                company_tax_country=request.data.get("payment.projectTaxCountry"),
+                company_tax_identification_number=request.data.get(
+                    "payment.taxIdNumber"
+                ),
+                company_white_paper_url=request.data.get("payment.whitePaperUrl"),
+                company_tokenomics_url=request.data.get("payment.tokenomicsUrl"),
+                company_ubos=[
+                    {ubo_data: request.data[ubo_data]}
+                    for ubo_data in request.data
+                    if ubo_data.startswith("payment.UBOs") and "File" not in ubo_data
+                ],
+            )
+            project.clean()
+            project.save()
+            rewards_dict = {}
+            for key in request.data.keys():
+                if key.startswith("rewards."):
+                    if key.split(".")[1] not in rewards_dict:
+                        rewards_dict[key.split(".")[1]] = {}
+                    if key.split(".")[2] == "incentives":
+                        if "incentives" not in rewards_dict[key.split(".")[1]]:
+                            rewards_dict[key.split(".")[1]]["incentives"] = {}
+                        rewards_dict[key.split(".")[1]]["incentives"][
+                            key.split(".")[3]
+                        ] = request.data[key]
+                    else:
+                        rewards_dict[key.split(".")[1]][
+                            key.split(".")[2]
+                        ] = request.data[key]
+            for reward in rewards_dict:
+                incentive = Incentive(
+                    title=rewards_dict[reward].get("incentiveTitle"),
+                    description=rewards_dict[reward].get("incentiveDescription"),
+                    included_incentives=list(
+                        rewards_dict[reward].get("incentives").values()
+                    )
+                    if rewards_dict[reward].get("incentives")
+                    else [],
+                    estimated_delivery=rewards_dict[reward].get(
+                        "incentiveEstimatedDelivery"
+                    ),
+                    available_items=int(
+                        rewards_dict[reward].get("availableIncentives")
+                    ),
+                    price=float(rewards_dict[reward].get("incentivePrice")),
+                    project=project,
+                )
+                incentive.clean()
+                incentive.save()
+            for key in request.FILES.keys():
+                if request.FILES.get(key) and key != "basics.projectImageFile":
+                    file = ProjectFile(
+                        owner=project,
+                        file=File(
+                            io.BytesIO(request.FILES.get(key).read()),
+                            name=request.FILES.get(key).__str__(),
+                        ),
+                    )
+                    file.save()
+            return Response(status=status.HTTP_201_CREATED)
+        except Exception:
+            print(traceback.format_exc())
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET"])
