@@ -119,12 +119,12 @@ def add_project(request):
                 ),
                 launch_date=request.data.get("basics.projectLaunchDate"),
                 deadline=request.data.get("basics.projectDeadlineDate"),
-                category=Category.objects.get(
+                category_id=Category.objects.get(
                     name=request.data.get("basics.projectCategory")
                 ).id
                 if request.data.get("basics.projectCategory")
                 else None,
-                subcategory=Subcategory.objects.get(
+                subcategory_id=Subcategory.objects.get(
                     name=request.data.get("basics.projectSubcategory")
                 ).id
                 if request.data.get("basics.projectSubcategory")
