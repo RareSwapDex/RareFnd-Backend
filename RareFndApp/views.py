@@ -1,3 +1,4 @@
+from http.client import BAD_REQUEST
 from pprint import pprint
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
@@ -103,7 +104,7 @@ def projects_details(request, id):
 
 
 @api_view(["POST"])
-@login_required
+# @login_required
 def add_project(request):
     if request.method == "POST":
         try:
@@ -212,6 +213,14 @@ def add_project(request):
         except Exception:
             print(traceback.format_exc())
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["GET"])
+# @login_required
+def get_profile_info(request):
+    queryset = User.objects.get(username=request.user.username)
+    serializer = UserSerializer(queryset)
+    return Response(serializer.data)
 
 
 @api_view(["GET"])

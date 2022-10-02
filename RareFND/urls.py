@@ -40,6 +40,7 @@ router = routers.DefaultRouter()
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/user/signup/", views.signup_user),
+    path("api/user/profile_info/", views.get_profile_info),
     path("api/incentives/<int:project_id>/", views.incentives),
     path("api/user/verify_email/", include(email_urls)),
     path("api/rarefnd/data/", views.get_rare_fnd_data),
