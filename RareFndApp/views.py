@@ -104,7 +104,7 @@ def projects_details(request, id):
 
 
 @api_view(["POST"])
-# @login_required
+@login_required
 def add_project(request):
     if request.method == "POST":
         try:
@@ -216,7 +216,7 @@ def add_project(request):
 
 
 @api_view(["GET"])
-# @login_required
+@login_required
 def get_profile_info(request):
     queryset = User.objects.get(username=request.user.username)
     serializer = UserSerializer(queryset)

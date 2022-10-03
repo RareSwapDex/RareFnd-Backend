@@ -129,8 +129,16 @@ class Type(models.Model):
 
 
 class Country(models.Model):
+    # All countries
     name = models.CharField(max_length=254, null=False, blank=False, unique=True)
-    phone_code = models.CharField(max_length=16, null=False, blank=False, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class EligibleCountry(models.Model):
+    # Countries which can crowdfund with us
+    name = models.CharField(max_length=254, null=False, blank=False, unique=True)
 
     def __str__(self):
         return self.name
