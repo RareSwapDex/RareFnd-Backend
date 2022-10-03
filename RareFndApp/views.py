@@ -15,6 +15,7 @@ from .serializers import (
     SubCategorySerializer,
     CountrySerializer,
     RareFndDataSerializer,
+    EligibleCountrySerializer,
 )
 from .models import (
     Project,
@@ -29,6 +30,7 @@ from .models import (
     RareFndData,
     ProjectFile,
     Type,
+    EligibleCountry,
 )
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -228,7 +230,15 @@ def countries_list(request):
     if request.method == "GET":
         queryset = Country.objects.all()
         serializer = CountrySerializer(queryset, many=True)
-        return Response({"categories": serializer.data})
+        return Response({"countries": serializer.data})
+
+
+@api_view(["GET"])
+def eligible_countries_list(request):
+    if request.method == "GET":
+        queryset = EligibleCountry.objects.all()
+        serializer = EligibleCountrySerializer(queryset, many=True)
+        return Response({"eligible_countries": serializer.data})
 
 
 @api_view(["GET"])

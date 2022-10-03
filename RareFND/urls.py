@@ -52,6 +52,7 @@ urlpatterns = [
         views.subcategories_list_of_category,
     ),
     path("api/country/", views.countries_list),
+    path("api/eligible_country/", views.eligible_countries_list),
     path("api/contribution/", views.contributions_list),
     path("api/pending_contribution/", views.pending_contributions_list),
     path("api/project/", views.projects_list),
