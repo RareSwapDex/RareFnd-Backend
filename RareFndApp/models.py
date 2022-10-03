@@ -130,15 +130,26 @@ class Type(models.Model):
 
 class Country(models.Model):
     # All countries
-    name = models.CharField(max_length=254, null=False, blank=False, unique=True)
+    iso = models.CharField(max_length=2, null=True)
+    name = models.CharField(max_length=254, null=True)
+    nicename = models.CharField(max_length=254, null=True)
+    iso3 = models.CharField(max_length=3, null=True)
+    numcode = models.IntegerField(null=True)
+    phonecode = models.IntegerField(null=True)
 
     def __str__(self):
         return self.name
 
 
 class EligibleCountry(models.Model):
+    # iso, name, nicename, iso3, numcode, phonecode
     # Countries which can crowdfund with us
-    name = models.CharField(max_length=254, null=False, blank=False, unique=True)
+    iso = models.CharField(max_length=2, null=True)
+    name = models.CharField(max_length=254, null=True)
+    nicename = models.CharField(max_length=254, null=True)
+    iso3 = models.CharField(max_length=3, null=True)
+    numcode = models.IntegerField(null=True)
+    phonecode = models.IntegerField(null=True)
 
     def __str__(self):
         return self.name
