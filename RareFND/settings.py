@@ -80,7 +80,7 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = "dontreply@rarefnd.com"
 EMAIL_HOST_PASSWORD = "Rat2Jalil2!"
 # EMAIL_HOST_PASSWORD = os.environ.get(
-#     "RAREFND_DONT_REPLY_PASSWORD"
+#     "RAREFND_DONT_REPLY_PASSWORD
 # )  # os.environ['password_key'] suggested
 # print("fsajkudhfas", EMAIL_HOST_PASSWORD)
 EMAIL_USE_TLS = True
@@ -108,7 +108,6 @@ SIMPLE_JWT = {
     "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
     "TOKEN_TYPE_CLAIM": "token_type",
-    "TOKEN_USER_CLASS": "rest_framework_simplejwt.models.TokenUser",
     "JTI_CLAIM": "jti",
     "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
     "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
@@ -118,7 +117,7 @@ SIMPLE_JWT = {
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    )
+    ),
 }
 
 MIDDLEWARE = [

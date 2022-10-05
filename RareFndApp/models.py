@@ -167,7 +167,9 @@ class Project(models.Model):
     owner = models.ForeignKey(User, null=True, blank=False, on_delete=models.SET_NULL)
     title = models.CharField(max_length=254, null=True, blank=False)
     head = models.TextField(max_length=280, null=True, blank=False)
-    country = models.CharField(max_length=254, null=True, blank=False)
+    country = models.ForeignKey(
+        EligibleCountry, null=True, blank=False, on_delete=models.SET_NULL
+    )
     address = models.CharField(max_length=254, null=True, blank=False)
     thumbnail = models.ImageField(
         blank=False,
@@ -181,7 +183,9 @@ class Project(models.Model):
     category = models.ForeignKey(
         Category, null=True, blank=False, on_delete=models.SET_NULL
     )
-    subcategory = models.ForeignKey(Subcategory, null=True, on_delete=models.SET_NULL)
+    subcategory = models.ForeignKey(
+        Subcategory, blank=True, null=True, on_delete=models.SET_NULL
+    )
     type = models.ForeignKey(Type, null=True, blank=False, on_delete=models.SET_NULL)
     # Funding
     fund_amount = models.FloatField(null=True, blank=False)
@@ -195,7 +199,13 @@ class Project(models.Model):
     company_address = models.CharField(max_length=254, null=True, blank=False)
     company_city = models.CharField(max_length=254, null=True, blank=False)
     company_zip_code = models.CharField(max_length=254, null=True, blank=False)
-    company_country = models.CharField(max_length=254, null=True, blank=False)
+    company_country = models.ForeignKey(
+        EligibleCountry,
+        null=True,
+        blank=False,
+        on_delete=models.SET_NULL,
+        related_name="company_tax_country",
+    )
     company_incorporation_date = models.DateTimeField(null=True, default=None)
     company_registration_number = models.CharField(
         max_length=254, null=True, blank=False
@@ -203,7 +213,14 @@ class Project(models.Model):
     company_estimated_annual_turnover = models.CharField(
         max_length=254, null=True, blank=False
     )
-    company_tax_country = models.CharField(max_length=254, null=True, blank=False)
+    company_tax_country = models.ForeignKey(
+        EligibleCountry,
+        null=True,
+        blank=False,
+        on_delete=models.SET_NULL,
+        related_name="ubo_company_tax_country",
+    )
+
     company_tax_identification_number = models.CharField(
         max_length=254, null=True, blank=False
     )

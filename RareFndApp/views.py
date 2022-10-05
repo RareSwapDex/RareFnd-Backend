@@ -38,9 +38,10 @@ from rest_framework import status
 from django_email_verification import send_email
 import traceback
 from django.contrib.auth import get_user_model
-import smtplib
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.decorators import login_required
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import RefreshToken, SlidingToken, UntypedToken
 
 
 # username='support@rarefnd.com'
@@ -108,13 +109,16 @@ def projects_details(request, id):
 @api_view(["POST"])
 @login_required
 def add_project(request):
+    pprint(request.data)
     if request.method == "POST":
         try:
             project = Project(
                 owner=request.user,
                 title=request.data.get("basics.projectTitle"),
                 head=request.data.get("basics.projectHead"),
-                country=request.data.get("basics.projectCountry"),
+                country_id=EligibleCountry.objects.get(
+                    nicename=request.data.get("basics.projectCountry")
+                ).id,
                 address=request.data.get("basics.projectAddress"),
                 thumbnail=ImageFile(
                     io.BytesIO(request.data.get("basics.projectImageFile").read()),
@@ -142,7 +146,9 @@ def add_project(request):
                 company_address=request.data.get("payment.companyAddress"),
                 company_city=request.data.get("payment.companyCity"),
                 company_zip_code=request.data.get("payment.companyZipCode"),
-                company_country=request.data.get("payment.projectTaxCountry"),
+                company_country_id=EligibleCountry.objects.get(
+                    nicename=request.data.get("payment.companyCountry")
+                ).id,
                 company_incorporation_date=request.data.get(
                     "payment.projectIncorporationDate"
                 ),
@@ -152,7 +158,9 @@ def add_project(request):
                 company_estimated_annual_turnover=request.data.get(
                     "payment.companyEstimatedAnnualTurnover"
                 ),
-                company_tax_country=request.data.get("payment.projectTaxCountry"),
+                company_tax_country_id=EligibleCountry.objects.get(
+                    nicename=request.data.get("payment.projectTaxCountry")
+                ).id,
                 company_tax_identification_number=request.data.get(
                     "payment.taxIdNumber"
                 ),
@@ -220,9 +228,11 @@ def add_project(request):
 @api_view(["GET"])
 @login_required
 def get_profile_info(request):
-    queryset = User.objects.get(username=request.user.username)
-    serializer = UserSerializer(queryset)
-    return Response(serializer.data)
+    if request.user.is_authenticated:
+        queryset = User.objects.get(username=request.user.username)
+        serializer = UserSerializer(queryset)
+        return Response(serializer.data)
+    return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(["GET"])
