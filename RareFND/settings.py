@@ -33,7 +33,7 @@ ALLOWED_HOSTS = [
     "rarefndapi.herokuapp.com",
     "127.0.0.1",
     "localhost",
-    "b20e-185-199-101-248.ngrok.io",
+    "a0a9-185-199-101-247.ngrok.io",
 ]
 
 

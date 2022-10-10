@@ -350,13 +350,20 @@ def signup_user(request):
             print(traceback.format_exc())
             return Response({"errors": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        # print(request.data)
-        # serializer = UserSerializer(data=request.data)
-        # if serializer.is_valid():
-        #     serializer.save()
-        #     send_email(request.data["username"])
-        #     return Response(status=status.HTTP_200_OK)
-        # print(serializer.errors)
+
+@api_view(["PUT"])
+@login_required
+def update_user(request):
+    try:
+        user = User.objects.get(pk=request.user.id)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    serializer = UserSerializer(user, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    print(serializer.errors)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET"])
