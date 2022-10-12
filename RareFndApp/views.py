@@ -42,6 +42,22 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.decorators import login_required
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken, SlidingToken, UntypedToken
+import boto3
+from django.conf import settings
+import urllib
+import random
+import string
+
+
+S3_BUCKET_KEY = settings.AWS_SECRET_ACCESS_KEY
+S3_BUCKET_NAME = settings.AWS_STORAGE_BUCKET_NAME
+
+s3_session = boto3.Session(
+    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=S3_BUCKET_KEY,
+)
+s3 = s3_session.resource("s3")
+bucket = s3.Bucket(S3_BUCKET_NAME)
 
 
 # username='support@rarefnd.com'
@@ -82,7 +98,7 @@ def main(request):
 @api_view(["GET"])
 def projects_list(request):
     if request.method == "GET":
-        queryset = Project.objects.all()
+        queryset = Project.objects.filter(approved=True)
         serializer = ProjectSerializer(queryset, many=True)
         print(serializer.data)
         return Response({"projects": serializer.data})
@@ -220,9 +236,59 @@ def add_project(request):
                     )
                     file.save()
             return Response(status=status.HTTP_201_CREATED)
-        except Exception:
+        except Exception as e:
             print(traceback.format_exc())
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response({"errors": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["PUT"])
+@login_required
+def subscribe_to_project(request):
+    try:
+        project = Project.objects.get(pk=request.data["projectId"])
+        if request.user not in project.subscribed_users.all():
+            project.subscribed_users.add(request.user)
+        return Response(status=status.HTTP_200_OK)
+    except Exception:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(["POST"])
+@login_required
+def upload_ckeditor_image(request):
+    try:
+        file_extension = str(request.data["ckeditorFile"]).split(".")[-1]
+        gen_file_name = "".join(
+            random.choices(string.ascii_uppercase + string.digits, k=10)
+        )
+        path = f"projects/CKEditor/{gen_file_name}.{file_extension}"
+        print(f"https://rarefnd-bucket.s3.us-east-2.amazonaws.com/{path}")
+        s3_obj = bucket.Object(path)
+        s3_obj.put(ACL="public-read")
+        s3_obj.upload_fileobj(
+            # request.data["ckeditorFile"].file, ExtraArgs={"ACL": "public-read"}
+            request.data["ckeditorFile"].file,
+        )
+        return Response(
+            {"url": f"https://rarefnd-bucket.s3.us-east-2.amazonaws.com/{path}"},
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(traceback.format_exc())
+        return Response({"response": e}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["GET"])
+@login_required
+def check_subscribed_to_project(request, projectId):
+    try:
+        project = Project.objects.get(pk=projectId)
+        return Response(
+            {"subscribed": request.user in project.subscribed_users.all()},
+            status=status.HTTP_200_OK,
+        )
+    except Exception:
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(["GET"])
@@ -271,12 +337,14 @@ def subcategories_list_of_category(request, category_name):
 def projects_from_category(request, category_name):
     if category_name == "all":
         try:
-            projects = Project.objects.all()
+            projects = Project.objects.filter(approved=True)
         except Project.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
     else:
         try:
-            projects = Project.objects.filter(category__name=category_name)
+            projects = Project.objects.filter(
+                category__name=category_name, approved=True
+            )
         except Project.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method == "GET":
@@ -318,9 +386,13 @@ def token_price(request):
 def unique_username(request, field_to_check, field_value):
     if request.method == "GET":
         if field_to_check == "username":
+            if request.user.is_authenticated and request.user.username == field_value:
+                return Response({"valid": True})
             queryset = User.objects.filter(username__iexact=field_value)
             return Response({"valid": len(queryset) == 0})
         elif field_to_check == "email":
+            if request.user.is_authenticated and request.user.email == field_value:
+                return Response({"valid": True})
             queryset = User.objects.filter(email__iexact=field_value)
             return Response({"valid": len(queryset) == 0})
 
@@ -363,7 +435,7 @@ def update_user(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
     print(serializer.errors)
-    return Response(status=status.HTTP_400_BAD_REQUEST)
+    return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET"])

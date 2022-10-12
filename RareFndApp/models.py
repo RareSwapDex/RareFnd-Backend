@@ -235,6 +235,9 @@ class Project(models.Model):
     approved = models.BooleanField(default=False)
     live = models.BooleanField(default=False)
     project_live_datetime = models.DateTimeField(null=True, default=None, blank=True)
+    subscribed_users = models.ManyToManyField(
+        User, related_name="Projects", default=None, blank=True
+    )
 
     def __str__(self):
         return self.title

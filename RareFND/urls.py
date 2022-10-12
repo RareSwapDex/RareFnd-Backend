@@ -48,6 +48,12 @@ urlpatterns = [
     path("api/unique/<str:field_to_check>/<str:field_value>/", views.unique_username),
     path("api/project/category/<str:category_name>/", views.projects_from_category),
     path("api/project/add/", views.add_project),
+    path("api/project/ckeditor/upload_image", views.upload_ckeditor_image),
+    path(
+        "api/project/checked_subscribed/<int:projectId>/",
+        views.check_subscribed_to_project,
+    ),
+    path("api/project/subscribe/", views.subscribe_to_project),
     path(
         "api/category/<str:category_name>/subcategories/",
         views.subcategories_list_of_category,
