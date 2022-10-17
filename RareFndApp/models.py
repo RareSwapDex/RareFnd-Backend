@@ -242,7 +242,8 @@ class Project(models.Model):
 
     @property
     def number_of_subscribed_users(self):
-        return 1
+        print(";fijasdijsa____________________________", self.subscribed_users)
+        return self.subscribed_users.count()
 
     def __str__(self):
         return self.title
