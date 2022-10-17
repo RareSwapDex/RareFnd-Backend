@@ -226,7 +226,7 @@ class Project(models.Model):
     )
     company_white_paper_url = models.CharField(max_length=1000, null=True, blank=False)
     company_tokenomics_url = models.CharField(max_length=1000, null=True, blank=False)
-    company_ubos = JSONField(null=True, default=dict)
+    company_ubos = JSONField(null=True, default=dict, blank=True)
 
     raised_amount = models.FloatField(null=True, blank=True, default=0)
     rewarded_amount = models.FloatField(null=True, blank=True, default=0)
@@ -238,6 +238,11 @@ class Project(models.Model):
     subscribed_users = models.ManyToManyField(
         User, related_name="Projects", default=None, blank=True
     )
+    # number_of_subscribed_users = subscribed_users.all().count()
+
+    @property
+    def number_of_subscribed_users(self):
+        return 1
 
     def __str__(self):
         return self.title

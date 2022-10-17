@@ -35,10 +35,41 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 # create a serializer class
 class ProjectSerializer(serializers.ModelSerializer):
+    number_of_subscribed_users = serializers.ReadOnlyField()
+
     # create a meta class
     class Meta:
         model = Project
-        fields = "__all__"
+        # fields = "__all__"
+        fields = [
+            "id",
+            "title",
+            "staking_address",
+            "staking_abi",
+            "head",
+            "address",
+            "thumbnail",
+            "creation_datetime",
+            "launch_date",
+            "deadline",
+            "fund_amount",
+            "description",
+            "company_name",
+            "company_nature_of_business",
+            "company_white_paper_url",
+            "company_tokenomics_url",
+            "raised_amount",
+            "rewarded_amount",
+            "approved",
+            "live",
+            "project_live_datetime",
+            "country",
+            "category",
+            "subcategory",
+            "type",
+            "company_country",
+            "number_of_subscribed_users",
+        ]
 
 
 class CategorySerializer(serializers.ModelSerializer):
