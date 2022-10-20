@@ -238,11 +238,9 @@ class Project(models.Model):
     subscribed_users = models.ManyToManyField(
         User, related_name="Projects", default=None, blank=True
     )
-    # number_of_subscribed_users = subscribed_users.all().count()
 
     @property
     def number_of_subscribed_users(self):
-        print(";fijasdijsa____________________________", self.subscribed_users)
         return self.subscribed_users.count()
 
     def __str__(self):

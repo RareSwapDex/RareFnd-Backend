@@ -40,7 +40,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     # create a meta class
     class Meta:
         model = Project
-        # fields = "__all__"
+        fields = "__all__"
         fields = [
             "id",
             "title",

@@ -152,12 +152,12 @@ def get_fnd_usd_value(
     )
     fnd_bnb_value = float(BNB_liquidity) / float(FND_liquidity)
     fnd_usd_value = fnd_bnb_value * bnb_usd_value
-    token_price = TokenPrice.objects.filter()
-    if token_price:
-        token_price[0].price = fnd_usd_value
-        token_price[0].save()
-    else:
-        t_p = TokenPrice(price=fnd_usd_value)
-        t_p.save()
+    # token_price = TokenPrice.objects.filter()
+    # if token_price:
+    #     token_price[0].price = fnd_usd_value
+    #     token_price[0].save()
+    # else:
+    #     t_p = TokenPrice(price=fnd_usd_value)
+    #     t_p.save()
     FND_USD_PRICE = fnd_usd_value
     return {"fnd_usd": fnd_usd_value, "timestamp": timestamp}

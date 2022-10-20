@@ -367,6 +367,7 @@ def pending_contributions_list(request):
         serializer = PendingContributionSerializer(queryset, many=True)
         return Response({"pending_contributions": serializer.data})
     elif request.method == "POST":
+        print("hahahaha", request.data)
         serializer = PendingContributionSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
