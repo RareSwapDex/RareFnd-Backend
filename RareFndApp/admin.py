@@ -115,6 +115,7 @@ class UserAdmin(BaseUserAdmin):
                     "username",
                     "first_name",
                     "last_name",
+                    "bio",
                     "phone",
                     "wallet_address",
                     "total_contributions",

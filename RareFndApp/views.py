@@ -453,3 +453,14 @@ def get_rare_fnd_data(request):
         queryset = RareFndData.objects.all()[0]
         serializer = RareFndDataSerializer(queryset)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+def user_info(request, user_id):
+    if request.method == "GET":
+        queryset = User.objects.get(pk=user_id)
+        serializer = UserSerializer(queryset)
+        tmp = serializer.data
+        del tmp["phone"]
+        del tmp["wallet_address"]
+        return Response(tmp, status=status.HTTP_200_OK)

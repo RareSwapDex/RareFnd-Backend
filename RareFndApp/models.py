@@ -11,6 +11,7 @@ class UserManager(BaseUserManager):
         self,
         email,
         username,
+        bio,
         password,
         first_name=None,
         last_name=None,
@@ -27,6 +28,7 @@ class UserManager(BaseUserManager):
             username=username,
             first_name=first_name,
             last_name=last_name,
+            bio=bio,
             phone=phone,
             wallet_address=wallet_address,
             total_contributions=total_contributions,
@@ -61,6 +63,7 @@ class User(AbstractBaseUser):
     password = models.CharField(max_length=254, null=False, blank=False)
     first_name = models.CharField(null=True, blank=True, max_length=50)
     last_name = models.CharField(null=True, blank=True, max_length=50)
+    bio = models.CharField(max_length=10000, null=True, blank=True, default="")
     phone = PhoneNumberField(null=True, blank=True)
     wallet_address = models.CharField(
         max_length=254, null=True, blank=True, default="None"
@@ -242,6 +245,10 @@ class Project(models.Model):
     @property
     def number_of_subscribed_users(self):
         return self.subscribed_users.count()
+
+    @property
+    def owner_username(self):
+        return self.owner.username
 
     def __str__(self):
         return self.title

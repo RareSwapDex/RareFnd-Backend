@@ -43,6 +43,7 @@ urlpatterns = [
     path("api/user/profile_info/", views.get_profile_info),
     path("api/user/update/", views.update_user),
     path("api/incentives/<int:project_id>/", views.incentives),
+    path("api/profile/<int:user_id>/", views.user_info),
     path("api/user/verify_email/", include(email_urls)),
     path("api/rarefnd/data/", views.get_rare_fnd_data),
     path("api/unique/<str:field_to_check>/<str:field_value>/", views.unique_username),

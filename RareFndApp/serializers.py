@@ -36,13 +36,16 @@ class MyTokenObtainPairView(TokenObtainPairView):
 # create a serializer class
 class ProjectSerializer(serializers.ModelSerializer):
     number_of_subscribed_users = serializers.ReadOnlyField()
+    owner_username = serializers.ReadOnlyField()
 
     # create a meta class
     class Meta:
         model = Project
-        fields = "__all__"
+        # fields = "__all__"
         fields = [
             "id",
+            "owner",
+            "owner_username",
             "title",
             "staking_address",
             "staking_abi",
@@ -114,6 +117,7 @@ class UserSerializer(serializers.ModelSerializer):
             "last_name",
             "phone",
             "wallet_address",
+            "bio",
         ]
 
     def validate_password(self, value: str) -> str:
