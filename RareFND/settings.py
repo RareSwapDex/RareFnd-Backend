@@ -161,22 +161,22 @@ DATABASES = {
     #     "ENGINE": "django.db.backends.sqlite3",
     #     "NAME": BASE_DIR / "db.sqlite3",
     # }
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",
-        "USER": "rarefnd",
-        "PASSWORD": "rarefnd",
-        "HOST": "localhost",
-        "PORT": "5432",
-    }
     # "default": {
     #     "ENGINE": "django.db.backends.postgresql",
-    #     "NAME": "d8q7g3cng193np",
-    #     "USER": "taiiukyggxpvfx",
-    #     "PASSWORD": "5c185af73e99aca5864511ff17a42801b749dab8be930f972c34b86197d0e26a",
-    #     "HOST": "ec2-3-219-19-205.compute-1.amazonaws.com",
+    #     "NAME": "postgres",
+    #     "USER": "rarefnd",
+    #     "PASSWORD": "rarefnd",
+    #     "HOST": "localhost",
     #     "PORT": "5432",
     # }
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "d8q7g3cng193np",
+        "USER": "taiiukyggxpvfx",
+        "PASSWORD": "5c185af73e99aca5864511ff17a42801b749dab8be930f972c34b86197d0e26a",
+        "HOST": "ec2-3-219-19-205.compute-1.amazonaws.com",
+        "PORT": "5432",
+    }
 }
 
 
