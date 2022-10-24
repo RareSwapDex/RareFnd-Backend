@@ -37,6 +37,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
 class ProjectSerializer(serializers.ModelSerializer):
     number_of_subscribed_users = serializers.ReadOnlyField()
     owner_username = serializers.ReadOnlyField()
+    number_of_donators = serializers.ReadOnlyField()
 
     # create a meta class
     class Meta:
@@ -72,6 +73,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "type",
             "company_country",
             "number_of_subscribed_users",
+            "number_of_donators",
         ]
 
 

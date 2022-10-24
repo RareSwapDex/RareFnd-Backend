@@ -250,6 +250,15 @@ class Project(models.Model):
     def owner_username(self):
         return self.owner.username
 
+    @property
+    def number_of_donators(self):
+        # return len(Contribution.objects.filter(project=self))
+        return len(
+            Contribution.objects.filter(project=self)
+            .values("contributor_wallet_address")
+            .distinct()
+        )
+
     def __str__(self):
         return self.title
 
