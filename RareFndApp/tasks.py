@@ -37,10 +37,33 @@ def start_tasks():
         except Exception:
             print(traceback.format_exc())
         try:
-            get_fnd_usd_value(FND, BNB, BUSD, FND_BNB, router_pancake_swap)
+            update_project_rewards()
         except Exception:
             print(traceback.format_exc())
+        # try:
+        #     get_fnd_usd_value(FND, BNB, BUSD, FND_BNB, router_pancake_swap)
+        # except Exception:
+        #     print(traceback.format_exc())
         time.sleep(5)
+
+
+def update_project_rewards():
+    live_projects = Project.objects.filter(live=True)
+    for project in live_projects:
+        project_contributions = Contribution.objects.filter(project=project)
+        project_reward = 0
+        for contribution in project_contributions:
+            # time_since_contribution in seconds
+            time_since_contribution = (
+                datetime.now() - contribution.contribution_datetime.replace(tzinfo=None)
+            ).total_seconds()
+
+            contribution_amount = contribution.amount
+            project_reward += (
+                contribution_amount * (2.4 / 31536000) * time_since_contribution
+            )
+        project.current_reward = round(project_reward, 2)
+        project.save()
 
 
 def decode_transaction_input(tx_input, staking_address, staking_abi):
