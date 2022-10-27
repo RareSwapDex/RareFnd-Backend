@@ -64,6 +64,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "company_tokenomics_url",
             "raised_amount",
             "rewarded_amount",
+            "current_reward",
             "approved",
             "live",
             "project_live_datetime",
