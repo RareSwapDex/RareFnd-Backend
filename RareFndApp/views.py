@@ -100,14 +100,34 @@ def projects_list(request):
     if request.method == "GET":
         queryset = Project.objects.filter(approved=True)
         serializer = ProjectSerializer(queryset, many=True)
-        print(serializer.data)
         return Response({"projects": serializer.data})
 
 
 @api_view(["GET", "PUT"])
-def projects_details(request, id):
+def projects_details_by_id(request, id):
     try:
         project = Project.objects.get(pk=id)
+    except Project.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = ProjectSerializer(project)
+        return Response(serializer.data)
+    elif request.method == "PUT":
+        serializer = ProjectSerializer(project, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        print(serializer.errors)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["GET", "PUT"])
+def projects_details_by_title(request, title):
+    try:
+        project = Project.objects.filter(title__iexact=title)
+        if len(project) <= 0:
+            raise (Project.DoesNotExist)
+        project = project[0]
     except Project.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method == "GET":
@@ -262,7 +282,6 @@ def upload_ckeditor_image(request):
             random.choices(string.ascii_uppercase + string.digits, k=10)
         )
         path = f"projects/CKEditor/{gen_file_name}.{file_extension}"
-        print(f"https://rarefnd-bucket.s3.us-east-2.amazonaws.com/{path}")
         s3_obj = bucket.Object(path)
         s3_obj.put(ACL="public-read")
         s3_obj.upload_fileobj(
@@ -367,7 +386,6 @@ def pending_contributions_list(request):
         serializer = PendingContributionSerializer(queryset, many=True)
         return Response({"pending_contributions": serializer.data})
     elif request.method == "POST":
-        print("hahahaha", request.data)
         serializer = PendingContributionSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -384,7 +402,7 @@ def token_price(request):
 
 
 @api_view(["GET"])
-def unique_username(request, field_to_check, field_value):
+def unique_record(request, field_to_check, field_value):
     if request.method == "GET":
         if field_to_check == "username":
             if request.user.is_authenticated and request.user.username == field_value:
@@ -396,13 +414,15 @@ def unique_username(request, field_to_check, field_value):
                 return Response({"valid": True})
             queryset = User.objects.filter(email__iexact=field_value)
             return Response({"valid": len(queryset) == 0})
+        elif field_to_check == "project_title":
+            queryset = Project.objects.filter(title__iexact=field_value)
+            return Response({"valid": len(queryset) == 0})
 
 
 @api_view(["POST"])
 def signup_user(request):
     if request.method == "POST":
         try:
-            print(request.data)
             unverifiedUser = get_user_model().objects.create(
                 username=request.data["username"],
                 password=make_password(request.data["password"]),

@@ -63,7 +63,7 @@ class User(AbstractBaseUser):
     password = models.CharField(max_length=254, null=False, blank=False)
     first_name = models.CharField(null=True, blank=True, max_length=50)
     last_name = models.CharField(null=True, blank=True, max_length=50)
-    bio = models.CharField(max_length=10000, null=True, blank=True, default="")
+    bio = models.TextField(max_length=10000, null=True, blank=True, default="")
     phone = PhoneNumberField(null=True, blank=True)
     wallet_address = models.CharField(
         max_length=254, null=True, blank=True, default="None"
@@ -168,7 +168,7 @@ def get_project_files_directory(instance, filename):
 class Project(models.Model):
     # Basics
     owner = models.ForeignKey(User, null=True, blank=False, on_delete=models.SET_NULL)
-    title = models.CharField(max_length=254, null=True, blank=False)
+    title = models.CharField(max_length=254, null=True, blank=False, unique=True)
     head = models.TextField(max_length=280, null=True, blank=False)
     country = models.ForeignKey(
         EligibleCountry, null=True, blank=False, on_delete=models.SET_NULL
@@ -193,7 +193,23 @@ class Project(models.Model):
     # Funding
     fund_amount = models.FloatField(null=True, blank=False)
     # Story
-    description = RichTextField(max_length=10000, null=True, blank=False)
+    description = RichTextField(
+        max_length=10000,
+        null=True,
+        blank=False,
+        external_plugin_resources=[
+            (
+                "youtube",
+                "https://rarefnd-bucket.s3.us-east-2.amazonaws.com/ckeditor/ckeditor/plugins/youtube/youtube/",
+                "plugin.js",
+            ),
+            (
+                "html5video",
+                "https://rarefnd-bucket.s3.us-east-2.amazonaws.com/ckeditor/ckeditor/plugins/html5_video/html5video/",
+                "plugin.js",
+            ),
+        ],
+    )
     # Payment
     company_name = models.CharField(max_length=254, null=True, blank=False)
     company_nature_of_business = models.CharField(

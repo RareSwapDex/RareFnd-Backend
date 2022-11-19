@@ -90,6 +90,30 @@ EMAIL_USE_TLS = True
 AUTH_USER_MODEL = "RareFndApp.User"
 
 
+CKEDITOR_CONFIGS = {
+    "default": {
+        "toolbar": "CMS",
+        "width": "100%",
+        "toolbar_CMS": [
+            ["Format", "Styles", "FontSize"],
+            ["Bold", "Italic", "Underline", "Strike", "Subscript", "Superscript"],
+            ["TextColor", "BGColor"],
+            ["Link", "Unlink"],
+            ["JustifyLeft", "JustifyCenter", "JustifyRight", "JustifyBlock"],
+            ["Undo", "Redo"],
+            ["Copy", "Paste", "PasteText", "PasteFromWord"],
+            ["SelectAll", "Find", "Replace"],
+            ["NumberedList", "BulletedList"],
+            ["Outdent", "Indent"],
+            ["Smiley", "SpecialChar", "Blockquote", "HorizontalRule"],
+            ["Table", "Image", "Html5video", "Youtube"],
+            ["ShowBlocks", "Source", "About"],
+        ],
+        "extraPlugins": ",".join(["youtube", "html5video"]),
+    },
+}
+
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=90),
@@ -242,7 +266,5 @@ AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL = None
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-
-
 AWS_S3_REGION_NAME = "us-east-2"
 AWS_S3_SIGNATURE_VERSION = "s3v4"
