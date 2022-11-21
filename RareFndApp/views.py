@@ -200,8 +200,8 @@ def add_project(request):
                 company_tax_identification_number=request.data.get(
                     "payment.taxIdNumber"
                 ),
-                company_white_paper_url=request.data.get("payment.whitePaperUrl"),
-                company_tokenomics_url=request.data.get("payment.tokenomicsUrl"),
+                # company_white_paper_url=request.data.get("payment.whitePaperUrl"),
+                # company_tokenomics_url=request.data.get("payment.tokenomicsUrl"),
                 company_ubos=[
                     {ubo_data: request.data[ubo_data]}
                     for ubo_data in request.data

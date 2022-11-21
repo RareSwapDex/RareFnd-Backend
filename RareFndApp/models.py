@@ -243,8 +243,8 @@ class Project(models.Model):
     company_tax_identification_number = models.CharField(
         max_length=254, null=True, blank=False
     )
-    company_white_paper_url = models.CharField(max_length=1000, null=True, blank=True)
-    company_tokenomics_url = models.CharField(max_length=1000, null=True, blank=True)
+    # company_white_paper_url = models.CharField(max_length=1000, null=True, blank=True)
+    # company_tokenomics_url = models.CharField(max_length=1000, null=True, blank=True)
     company_ubos = JSONField(null=True, default=dict, blank=True)
 
     current_reward = models.FloatField(null=False, blank=False, default=0)
