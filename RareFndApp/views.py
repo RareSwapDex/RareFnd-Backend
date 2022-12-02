@@ -47,10 +47,14 @@ from django.conf import settings
 import urllib
 import random
 import string
+import requests
+import urllib.parse
 
 
 S3_BUCKET_KEY = settings.AWS_SECRET_ACCESS_KEY
 S3_BUCKET_NAME = settings.AWS_STORAGE_BUCKET_NAME
+CLIENT_ID = settings.CLIENT_ID
+CLIENT_SECRET = settings.CLIENT_SECRET
 
 s3_session = boto3.Session(
     aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
@@ -484,3 +488,20 @@ def user_info(request, user_id):
         del tmp["phone"]
         del tmp["wallet_address"]
         return Response(tmp, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+def get_venly_auth(request):
+    if request.method == "GET":
+        details = {
+            "grant_type": "client_credentials",
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+        }
+        # grant_type=client_credentials&client_id=Testaccount-capsule&client_secret=82c19251-1753-44f5-ae76-93438d3628de
+        response = requests.post(
+            "https://login-staging.arkane.network/auth/realms/Arkane/protocol/openid-connect/token",
+            urllib.parse.urlencode(details),
+            headers={"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
+        ).json()
+        return Response(response, status=status.HTTP_200_OK)

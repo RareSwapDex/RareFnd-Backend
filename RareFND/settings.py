@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "django_email_verification",
     "storages",
+    "requests",
 ]
 
 
@@ -268,3 +269,7 @@ DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 AWS_S3_REGION_NAME = "us-east-2"
 AWS_S3_SIGNATURE_VERSION = "s3v4"
+
+# Venly creds
+CLIENT_ID = "Testaccount-capsule"
+CLIENT_SECRET = "82c19251-1753-44f5-ae76-93438d3628de"
