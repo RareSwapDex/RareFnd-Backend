@@ -69,7 +69,7 @@ urlpatterns = [
     path("api/project/<int:id>/", views.projects_details_by_id),
     path("api/projects/<str:title>/", views.projects_details_by_title),
     path("api/project/title/", views.projects_details_by_title),
-    path("api/venly_auth", views.get_venly_auth),
+    path("api/venly_auth/", views.get_venly_auth),
     path("", include("RareFndApp.urls")),
     path("tinymce/", include("tinymce.urls")),
     re_path(
