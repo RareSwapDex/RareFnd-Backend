@@ -271,5 +271,5 @@ AWS_S3_REGION_NAME = "us-east-2"
 AWS_S3_SIGNATURE_VERSION = "s3v4"
 
 # Venly creds
-CLIENT_ID = "Testaccount-capsule"
-CLIENT_SECRET = "82c19251-1753-44f5-ae76-93438d3628de"
+CLIENT_ID = "TheRareAntiquities-capsule"
+CLIENT_SECRET = "dd2d1cdc-2dab-497f-bce5-e79ec5e533ec"

@@ -1,6 +1,5 @@
 from http.client import BAD_REQUEST
 from pprint import pprint
-from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.core.files.images import ImageFile, File
 import io
@@ -48,7 +47,6 @@ import urllib
 import random
 import string
 import requests
-import urllib.parse
 
 
 S3_BUCKET_KEY = settings.AWS_SECRET_ACCESS_KEY
@@ -498,9 +496,9 @@ def get_venly_auth(request):
             "client_id": CLIENT_ID,
             "client_secret": CLIENT_SECRET,
         }
-        # grant_type=client_credentials&client_id=Testaccount-capsule&client_secret=82c19251-1753-44f5-ae76-93438d3628de
         response = requests.post(
-            "https://login-staging.arkane.network/auth/realms/Arkane/protocol/openid-connect/token",
+            # "https://login-staging.arkane.network/auth/realms/Arkane/protocol/openid-connect/token",
+            "https://login.arkane.network/auth/realms/Arkane/protocol/openid-connect/token",
             urllib.parse.urlencode(details),
             headers={"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
         ).json()
