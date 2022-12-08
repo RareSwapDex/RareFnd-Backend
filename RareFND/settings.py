@@ -272,4 +272,4 @@ AWS_S3_SIGNATURE_VERSION = "s3v4"
 
 # Venly creds
 CLIENT_ID = "TheRareAntiquities-capsule"
-CLIENT_SECRET = "dd2d1cdc-2dab-497f-bce5-e79ec5e533ec"
+CLIENT_SECRET = "0d6aa5fe-97ea-40f9-b839-276240448758"
