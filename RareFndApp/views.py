@@ -517,7 +517,7 @@ def venly_execute_swap(request):
     del data["token"]
     response = requests.post(
         "https://api-wallet.venly.io/api/transactions/execute",
-        data,
+        json=data,
         headers={
             "Authorization": f"Bearer {access_token}",
         },
