@@ -512,11 +512,12 @@ def get_venly_auth(request):
 
 @api_view(["POST"])
 def venly_execute_swap(request):
-    authTokens = get_venly_auth_helper()
-    access_token = authTokens["access_token"]
+    data = request.data
+    access_token = data["token"]
+    del data["token"]
     response = requests.post(
         "https://api-wallet.venly.io/api/transactions/execute",
-        request.data,
+        data,
         headers={
             "Authorization": f"Bearer {access_token}",
         },
