@@ -488,18 +488,37 @@ def user_info(request, user_id):
         return Response(tmp, status=status.HTTP_200_OK)
 
 
+def get_venly_auth_helper():
+    details = {
+        "grant_type": "client_credentials",
+        "client_id": CLIENT_ID,
+        "client_secret": CLIENT_SECRET,
+    }
+    response = requests.post(
+        # "https://login-staging.arkane.network/auth/realms/Arkane/protocol/openid-connect/token",
+        "https://login.arkane.network/auth/realms/Arkane/protocol/openid-connect/token",
+        urllib.parse.urlencode(details),
+        headers={"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
+    ).json()
+    return response
+
+
 @api_view(["GET"])
 def get_venly_auth(request):
     if request.method == "GET":
-        details = {
-            "grant_type": "client_credentials",
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-        }
-        response = requests.post(
-            # "https://login-staging.arkane.network/auth/realms/Arkane/protocol/openid-connect/token",
-            "https://login.arkane.network/auth/realms/Arkane/protocol/openid-connect/token",
-            urllib.parse.urlencode(details),
-            headers={"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
-        ).json()
+        response = get_venly_auth_helper()
         return Response(response, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+def venly_execute_swap(request):
+    authTokens = get_venly_auth_helper()
+    access_token = authTokens["access_token"]
+    response = requests.post(
+        "https://api-wallet.venly.io/api/transactions/execute",
+        request.data,
+        headers={
+            "Authorization": f"Bearer {access_token}",
+        },
+    )
+    return Response(response, status=status.HTTP_200_OK)
