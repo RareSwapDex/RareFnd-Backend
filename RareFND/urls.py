@@ -80,6 +80,8 @@ urlpatterns = [
     ),
     path("api/auth/token/", MyTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/venly/create_wallet/<str:email>/", views.venly_create_wallet),
+    # kk
     path("api/auth/venly_auth/", views.get_venly_auth),
     path("api/venly_execute_swap/", views.venly_execute_swap),
 ]

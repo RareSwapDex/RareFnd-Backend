@@ -47,6 +47,7 @@ import urllib
 import random
 import string
 import requests
+from . import venly
 
 
 S3_BUCKET_KEY = settings.AWS_SECRET_ACCESS_KEY
@@ -523,3 +524,19 @@ def venly_execute_swap(request):
         },
     )
     return Response(response, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+def venly_create_wallet(request, email):
+    wallet = venly.get_or_create_wallet(email)
+    # print(wallet)
+    response = {"address": wallet.get("address"), "email": wallet.get("identifier")}
+    return Response(response, status=status.HTTP_200_OK)
+
+
+# @api_view(["POST"])
+# def venly_create_wallet(request):
+#     wallet = venly.get_or_create_wallet()
+#     # print(wallet)
+#     response = {"address": wallet.get("address"), "email": wallet.get("identifier")}
+#     return Response(response, status=status.HTTP_200_OK)
