@@ -30,6 +30,7 @@ from .models import (
     ProjectFile,
     Type,
     EligibleCountry,
+    Mercuryo_pending_stake,
 )
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -527,16 +528,38 @@ def venly_execute_swap(request):
 
 
 @api_view(["GET"])
-def venly_create_wallet(request, email):
+def venly_create_wallet(request, email, usd_amount, smart_contract_address, project_id):
     wallet = venly.get_or_create_wallet(email)
-    # print(wallet)
-    response = {"address": wallet.get("address"), "email": wallet.get("identifier")}
-    return Response(response, status=status.HTTP_200_OK)
+    if wallet.get("address"):
+        pending_stake = Mercuryo_pending_stake(
+            wallet_address=wallet.get("address"),
+            smart_contract_address=smart_contract_address,
+            usd_amount=usd_amount,
+            project_id=project_id,
+        )
+        pending_stake.clean()
+        pending_stake.save()
+        response = {"address": wallet.get("address")}
+        return Response(response, status=status.HTTP_200_OK)
 
 
-# @api_view(["POST"])
-# def venly_create_wallet(request):
-#     wallet = venly.get_or_create_wallet()
-#     # print(wallet)
-#     response = {"address": wallet.get("address"), "email": wallet.get("identifier")}
-#     return Response(response, status=status.HTTP_200_OK)
+@api_view(["POST"])
+def mercuryo_callback_wallet_received_bnb(request):
+    # wallet = venly.get_or_create_wallet()
+    # response = {"address": wallet.get("address"), "email": wallet.get("identifier")}
+    pprint(request.data)
+    data = request.data["data"]
+    if data["status"] == "completed":
+        usd_amount_to_stake = data["fiat_amount"]
+        bnb_to_stake = data["amount"]
+        wallet_address = data["status"]
+        Mercuryo_pending_stake.filter(
+            wallet_address=wallet_address, usd_amount=usd_amount_to_stake
+        ).update(bnb_amount=bnb_to_stake)
+        response = venly.execute_stake(wallet_address, bnb_to_stake)
+        if response != None:
+            serializer = PendingContributionSerializer(data=response)
+            if serializer.is_valid():
+                serializer.save()
+    # return Response(response, status=status.HTTP_200_OK)
+    return Response({"ok": True}, status=status.HTTP_200_OK)

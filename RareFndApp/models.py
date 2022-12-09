@@ -365,3 +365,18 @@ class TokenPrice(models.Model):
 
     def __str__(self):
         return f"{self.price} {self.price_datetime}"
+
+
+class Mercuryo_pending_stake(models.Model):
+    wallet_address = models.CharField(
+        max_length=254, null=True, blank=True, default="None"
+    )
+    smart_contract_address = models.CharField(
+        max_length=254, null=True, blank=True, default="None"
+    )
+    usd_amount = models.FloatField(default=0)
+    bnb_amount = models.FloatField(default=0)
+    project_id = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.wallet_address} {self.smart_contract_address} {self.usd_amount}"

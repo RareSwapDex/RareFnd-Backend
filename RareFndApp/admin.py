@@ -14,6 +14,7 @@ from RareFndApp.models import (
     RareFndData,
     ProjectFile,
     EligibleCountry,
+    Mercuryo_pending_stake,
 )
 from django import forms
 from django.contrib import admin
@@ -174,3 +175,4 @@ admin.site.register(Incentive)
 admin.site.register(RareFndData)
 admin.site.register(ProjectFile)
 admin.site.register(EligibleCountry)
+admin.site.register(Mercuryo_pending_stake)

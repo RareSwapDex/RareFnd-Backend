@@ -4,6 +4,7 @@ import urllib
 from pprint import pprint
 import os
 import json
+from .models import Mercuryo_pending_stake
 
 
 # CLIENT_ID = settings.CLIENT_ID
@@ -11,7 +12,8 @@ import json
 CLIENT_ID = "TheRareAntiquities-capsule"
 CLIENT_SECRET = "0d6aa5fe-97ea-40f9-b839-276240448758"
 BNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
-PIN_CODE = "4911"
+# PIN_CODE = "4911"
+PIN_CODE = "9294"
 AUTH_TOKEN = ""
 AUTH_HEADERS = {}
 with open(os.path.join(settings.STATIC_ROOT, "token.json")) as token_json:
@@ -42,6 +44,14 @@ def get_auth_token():
 def get_wallet_by_identifier(identifier):
     response = requests.get(
         f"https://api-wallet.venly.io/api/wallets?identifier={identifier}",
+        headers=AUTH_HEADERS,
+    ).json()
+    return response["result"] if response["success"] else "Failed"
+
+
+def get_wallet_by_address(address):
+    response = requests.get(
+        f"https://api-wallet.venly.io/api/wallets?address={address}",
         headers=AUTH_HEADERS,
     ).json()
     return response["result"] if response["success"] else "Failed"
@@ -125,7 +135,7 @@ def swap_builder(wallet, pin_code, bnb_to_swap, fnd_to_receive):
     return response["result"][0]
 
 
-def execute_transaction(wallet, pin_code, swap_builder, bnb_value_to_swap):
+def execute_swap_transaction(wallet, pin_code, swap_builder, bnb_value_to_swap):
     wallet_id = wallet["id"]
     data = {
         "walletId": wallet_id,
@@ -199,6 +209,53 @@ def stake(wallet, pin_code, sc_address, amount_to_stake):
         headers=AUTH_HEADERS,
     ).json()
     return response
+
+
+def get_transaction_status(tx_status):
+    response = requests.get(
+        f"https://api-wallet.venly.io/api/transactions/BSC/{tx_status}/status",
+        headers=AUTH_HEADERS,
+    ).json()
+    return response
+
+
+def execute_stake(wallet_address, bnb_to_stake):
+    get_auth_token()
+    pending_tx = Mercuryo_pending_stake.filter(
+        wallet_address=wallet_address, bnb_amount=bnb_to_stake
+    )
+    sc_address = pending_tx.wallet_address
+    wallet = get_wallet_by_address(wallet_address)
+    swap_rates = get_swap_rates(bnb_to_stake)
+    fnd_to_receive = swap_rates["result"]["bestRate"]["outputAmount"]
+    swap_builder(wallet, PIN_CODE, bnb_to_stake, fnd_to_receive)
+    tx_hash = execute_swap_transaction(wallet, PIN_CODE, swap_builder, bnb_to_stake)[
+        "result"
+    ]["transactionHash"]
+    while True:
+        get_auth_token()
+        tx = get_transaction_status(tx_hash)
+        if tx["success"] == True:
+            if tx["result"]["status"] == "SUCCEEDED":
+                break
+    tx_hash = approve_smart_contract(wallet, PIN_CODE, sc_address)
+    while True:
+        get_auth_token()
+        tx = get_transaction_status(tx_hash)
+        if tx["success"] == True:
+            if tx["result"]["status"] == "SUCCEEDED":
+                break
+    tx_hash = stake(wallet, PIN_CODE, sc_address, fnd_to_receive)
+    while True:
+        get_auth_token()
+        tx = get_transaction_status(tx_hash)
+        if tx["success"] == True:
+            if tx["result"]["status"] == "SUCCEEDED":
+                break
+    return {
+        "hash": tx_hash,
+        "project": pending_tx.project_id,
+    }
 
 
 get_auth_token()

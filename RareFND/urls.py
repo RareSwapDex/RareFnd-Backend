@@ -80,7 +80,11 @@ urlpatterns = [
     ),
     path("api/auth/token/", MyTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
-    path("api/venly/create_wallet/<str:email>/", views.venly_create_wallet),
+    path(
+        "api/venly/create_wallet/<str:email>/<int:usd_amount>/<str:smart_contract_address>/<int:project_id>",
+        views.venly_create_wallet,
+    ),
+    path("api/mercuryo/payment_callback/", views.mercuryo_callback_wallet_received_bnb),
     # kk
     path("api/auth/venly_auth/", views.get_venly_auth),
     path("api/venly_execute_swap/", views.venly_execute_swap),
