@@ -4,7 +4,7 @@ import urllib
 from pprint import pprint
 import os
 import json
-from .models import Mercuryo_pending_stake
+from .models import MercuryoPendingStake
 
 
 # CLIENT_ID = settings.CLIENT_ID
@@ -221,9 +221,9 @@ def get_transaction_status(tx_status):
 
 def execute_stake(wallet_address, bnb_to_stake):
     get_auth_token()
-    pending_tx = Mercuryo_pending_stake.filter(
+    pending_tx = MercuryoPendingStake.objects.filter(
         wallet_address=wallet_address, bnb_amount=bnb_to_stake
-    )
+    )[0]
     sc_address = pending_tx.wallet_address
     wallet = get_wallet_by_address(wallet_address)
     swap_rates = get_swap_rates(bnb_to_stake)
@@ -251,11 +251,12 @@ def execute_stake(wallet_address, bnb_to_stake):
         tx = get_transaction_status(tx_hash)
         if tx["success"] == True:
             if tx["result"]["status"] == "SUCCEEDED":
-                break
-    return {
-        "hash": tx_hash,
-        "project": pending_tx.project_id,
-    }
+                pending_tx.staking_transaction_hash = tx_hash
+                pending_tx.save()
+                return {
+                    "hash": tx_hash,
+                    "project": pending_tx.project_id,
+                }
 
 
 get_auth_token()

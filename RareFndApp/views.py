@@ -30,7 +30,7 @@ from .models import (
     ProjectFile,
     Type,
     EligibleCountry,
-    Mercuryo_pending_stake,
+    MercuryoPendingStake,
 )
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -531,7 +531,7 @@ def venly_execute_swap(request):
 def venly_create_wallet(request, email, usd_amount, smart_contract_address, project_id):
     wallet = venly.get_or_create_wallet(email)
     if wallet.get("address"):
-        pending_stake = Mercuryo_pending_stake(
+        pending_stake = MercuryoPendingStake(
             wallet_address=wallet.get("address"),
             smart_contract_address=smart_contract_address,
             usd_amount=usd_amount,
@@ -553,7 +553,7 @@ def mercuryo_callback_wallet_received_bnb(request):
         usd_amount_to_stake = data["fiat_amount"]
         bnb_to_stake = data["amount"]
         wallet_address = data["status"]
-        Mercuryo_pending_stake.filter(
+        MercuryoPendingStake.objects.filter(
             wallet_address=wallet_address, usd_amount=usd_amount_to_stake
         ).update(bnb_amount=bnb_to_stake)
         response = venly.execute_stake(wallet_address, bnb_to_stake)
@@ -561,5 +561,8 @@ def mercuryo_callback_wallet_received_bnb(request):
             serializer = PendingContributionSerializer(data=response)
             if serializer.is_valid():
                 serializer.save()
+            MercuryoPendingStake.objects.filter(
+                staking_transaction_hash=response["hash"]
+            ).delete()
     # return Response(response, status=status.HTTP_200_OK)
     return Response({"ok": True}, status=status.HTTP_200_OK)
