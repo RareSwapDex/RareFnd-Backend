@@ -224,7 +224,7 @@ def get_transaction_status(tx_status):
 def execute_stake(wallet_address, usd_to_stake, bnb_to_stake):
     get_auth_token()
     pending_tx = MercuryoPendingStake.objects.filter(
-        wallet_address=wallet_address, usd_amount=usd_to_stake
+        wallet_address__iexact=wallet_address
     )[0]
     sc_address = pending_tx.smart_contract_address
     wallet = get_wallet_by_address(wallet_address)
