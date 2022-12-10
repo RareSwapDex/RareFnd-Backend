@@ -138,7 +138,6 @@ def swap_builder(wallet, pin_code, bnb_to_swap, fnd_to_receive):
 
 
 def execute_swap_transaction(wallet, pin_code, swap_builder, bnb_value_to_swap):
-    print(1)
     wallet_id = wallet["id"]
     data = {
         "walletId": wallet_id,
@@ -150,13 +149,11 @@ def execute_swap_transaction(wallet, pin_code, swap_builder, bnb_value_to_swap):
         "data": swap_builder["data"],
         "type": swap_builder["type"],
     }
-    print(2)
     response = requests.post(
         f"https://api-wallet.venly.io/api/transactions/execute",
         json=data,
         headers=AUTH_HEADERS,
     ).json()
-    print(3)
     return response
 
 
@@ -226,7 +223,6 @@ def get_transaction_status(tx_status):
 
 def execute_stake(wallet_address, usd_to_stake, bnb_to_stake):
     get_auth_token()
-    print(wallet_address, bnb_to_stake)
     pending_tx = MercuryoPendingStake.objects.filter(
         wallet_address=wallet_address, usd_amount=usd_to_stake
     )[0]
@@ -240,7 +236,6 @@ def execute_stake(wallet_address, usd_to_stake, bnb_to_stake):
     )
     tx_hash = tx_hash["result"]["transactionHash"]
     while True:
-        print("while True 1")
         get_auth_token()
         tx = get_transaction_status(tx_hash)
         if tx["success"] == True:
@@ -251,10 +246,8 @@ def execute_stake(wallet_address, usd_to_stake, bnb_to_stake):
     tx_hash = approve_smart_contract(wallet, PIN_CODE, sc_address)
     tx_hash = tx_hash["result"]["transactionHash"]
     while True:
-        print("while True 2")
         get_auth_token()
         tx = get_transaction_status(tx_hash)
-        print(tx["success"], tx)
         if tx["success"] == True:
             if tx["result"]["status"] == "SUCCEEDED":
                 break
@@ -263,7 +256,6 @@ def execute_stake(wallet_address, usd_to_stake, bnb_to_stake):
     tx_hash = stake(wallet, PIN_CODE, sc_address, fnd_to_receive)
     tx_hash = tx_hash["result"]["transactionHash"]
     while True:
-        print("while True 3")
         get_auth_token()
         tx = get_transaction_status(tx_hash)
         if tx["success"] == True:
