@@ -150,13 +150,8 @@ def check_pending_contributions():
                 tx_project_fund_amount = getattr(tx_project, "fund_amount")
                 tx_project_raised_amount = getattr(tx_project, "raised_amount")
                 tx_project_current_reward = getattr(tx_project, "current_reward")
-                tx_project_company_rewarded_amount = getattr(
-                    tx_project, "rewarded_amount"
-                )
                 if (
-                    tx_project_raised_amount
-                    + tx_project_current_reward
-                    + tx_project_company_rewarded_amount
+                    tx_project_raised_amount + tx_project_current_reward
                 ) >= tx_project_fund_amount:
                     Project.objects.filter(pk=tx["project"]).update(live=False)
 
