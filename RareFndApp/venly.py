@@ -116,7 +116,7 @@ def get_swap_rates(bnb_to_swap):
 def swap_builder(wallet, pin_code, bnb_to_swap, fnd_to_receive):
     wallet_id = wallet["id"]
     data = {
-        "enableGasEstimate": True,
+        # "enableGasEstimate": True,
         "pincode": pin_code,
         "walletId": wallet_id,
         "destinationWalletId": wallet_id,
@@ -134,6 +134,7 @@ def swap_builder(wallet, pin_code, bnb_to_swap, fnd_to_receive):
         json=data,
         headers=AUTH_HEADERS,
     ).json()
+    print(response)
     return response["result"][0]
 
 
@@ -142,8 +143,8 @@ def execute_swap_transaction(wallet, pin_code, swap_builder, bnb_value_to_swap):
     data = {
         "walletId": wallet_id,
         "pincode": pin_code,
-        "gasPrice": swap_builder["gasPrice"],
-        "gas": swap_builder["gas"],
+        "gasPrice": None,
+        "gas": None,
         "value": Web3.toWei(bnb_value_to_swap, "ether"),
         "to": swap_builder["to"],
         "data": swap_builder["data"],
@@ -223,18 +224,28 @@ def get_transaction_status(tx_status):
 
 def execute_stake(wallet_address, usd_to_stake, bnb_to_stake):
     get_auth_token()
+    pin_code = PIN_CODE
     pending_tx = MercuryoPendingStake.objects.filter(
         wallet_address__iexact=wallet_address
     )[0]
     sc_address = pending_tx.smart_contract_address
     wallet = get_wallet_by_address(wallet_address)
+    bnb_to_stake = str(float(bnb_to_stake) - 0.003)
     # a
     swap_rates = get_swap_rates(bnb_to_stake)
     fnd_to_receive = swap_rates["result"]["bestRate"]["outputAmount"]
-    swap_builder_response = swap_builder(wallet, PIN_CODE, bnb_to_stake, fnd_to_receive)
+    swap_builder_response = swap_builder(wallet, pin_code, bnb_to_stake, fnd_to_receive)
     tx_hash = execute_swap_transaction(
-        wallet, PIN_CODE, swap_builder_response, bnb_to_stake
+        wallet, pin_code, swap_builder_response, bnb_to_stake
     )
+    if not tx_hash["success"]:
+        if tx_hash["errors"][0]["code"] == "pincode.incorrect":
+            pin_code = "9294"
+            tx_hash = execute_swap_transaction(
+                wallet, pin_code, swap_builder_response, bnb_to_stake
+            )
+    print("lplplpl")
+    pprint(tx_hash)
     tx_hash = tx_hash["result"]["transactionHash"]
     while True:
         get_auth_token()
@@ -244,7 +255,7 @@ def execute_stake(wallet_address, usd_to_stake, bnb_to_stake):
                 break
         else:
             time.sleep(2)
-    tx_hash = approve_smart_contract(wallet, PIN_CODE, sc_address)
+    tx_hash = approve_smart_contract(wallet, pin_code, sc_address)
     tx_hash = tx_hash["result"]["transactionHash"]
     while True:
         get_auth_token()
@@ -255,8 +266,11 @@ def execute_stake(wallet_address, usd_to_stake, bnb_to_stake):
         else:
             time.sleep(2)
     # a
+    print(get_BNB_balance(wallet))
     wallet_fnd_balance = get_fnd_balance(wallet) - 1
-    tx_hash = stake(wallet, PIN_CODE, sc_address, wallet_fnd_balance)
+    tx_hash = stake(wallet, pin_code, sc_address, wallet_fnd_balance)
+    print("aaaa")
+    pprint(tx_hash)
     tx_hash = tx_hash["result"]["transactionHash"]
     while True:
         get_auth_token()
