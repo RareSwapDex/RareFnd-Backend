@@ -547,7 +547,6 @@ def venly_create_wallet(request, email, usd_amount, smart_contract_address, proj
 def mercuryo_callback_wallet_received_bnb(request):
     # wallet = venly.get_or_create_wallet()
     # response = {"address": wallet.get("address"), "email": wallet.get("identifier")}
-    pprint(request.data)
     data = request.data["data"]
     if data["status"] == "completed":
         usd_amount_to_stake = data["fiat_amount"]

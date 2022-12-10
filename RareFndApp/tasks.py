@@ -144,12 +144,19 @@ def check_pending_contributions():
                 Project.objects.filter(pk=tx["project"]).update(
                     raised_amount=project_raised_amount + tx_amount
                 )
+                tx_project = Project.objects.get(pk=tx["project"])
                 # Remove pending contribution from the table
                 PendingContribution.objects.filter(hash=tx["hash"]).delete()
                 # Check if project reached target amount
                 tx_project_fund_amount = getattr(tx_project, "fund_amount")
                 tx_project_raised_amount = getattr(tx_project, "raised_amount")
                 tx_project_current_reward = getattr(tx_project, "current_reward")
+                # print(
+                #     tx_project_raised_amount + tx_project_current_reward,
+                #     tx_project_fund_amount,
+                #     (tx_project_raised_amount + tx_project_current_reward)
+                #     >= tx_project_fund_amount,
+                # )
                 if (
                     tx_project_raised_amount + tx_project_current_reward
                 ) >= tx_project_fund_amount:
