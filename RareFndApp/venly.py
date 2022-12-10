@@ -228,6 +228,7 @@ def execute_stake(wallet_address, usd_to_stake, bnb_to_stake):
     )[0]
     sc_address = pending_tx.smart_contract_address
     wallet = get_wallet_by_address(wallet_address)
+    # a
     swap_rates = get_swap_rates(bnb_to_stake)
     fnd_to_receive = swap_rates["result"]["bestRate"]["outputAmount"]
     swap_builder_response = swap_builder(wallet, PIN_CODE, bnb_to_stake, fnd_to_receive)
@@ -253,7 +254,9 @@ def execute_stake(wallet_address, usd_to_stake, bnb_to_stake):
                 break
         else:
             time.sleep(2)
-    tx_hash = stake(wallet, PIN_CODE, sc_address, fnd_to_receive)
+    # a
+    wallet_fnd_balance = get_fnd_balance(wallet) - 1
+    tx_hash = stake(wallet, PIN_CODE, sc_address, wallet_fnd_balance)
     tx_hash = tx_hash["result"]["transactionHash"]
     while True:
         get_auth_token()
