@@ -5,6 +5,8 @@ from pprint import pprint
 import os
 import json
 from .models import MercuryoPendingStake
+import time
+from web3 import Web3
 
 
 # CLIENT_ID = settings.CLIENT_ID
@@ -12,8 +14,8 @@ from .models import MercuryoPendingStake
 CLIENT_ID = "TheRareAntiquities-capsule"
 CLIENT_SECRET = "0d6aa5fe-97ea-40f9-b839-276240448758"
 BNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
-# PIN_CODE = "4911"
-PIN_CODE = "9294"
+PIN_CODE = "4911"
+# PIN_CODE = "9294"
 AUTH_TOKEN = ""
 AUTH_HEADERS = {}
 with open(os.path.join(settings.STATIC_ROOT, "token.json")) as token_json:
@@ -54,7 +56,7 @@ def get_wallet_by_address(address):
         f"https://api-wallet.venly.io/api/wallets?address={address}",
         headers=AUTH_HEADERS,
     ).json()
-    return response["result"] if response["success"] else "Failed"
+    return response["result"][0] if response["success"] else "Failed"
 
 
 def get_all_wallets():
@@ -136,22 +138,25 @@ def swap_builder(wallet, pin_code, bnb_to_swap, fnd_to_receive):
 
 
 def execute_swap_transaction(wallet, pin_code, swap_builder, bnb_value_to_swap):
+    print(1)
     wallet_id = wallet["id"]
     data = {
         "walletId": wallet_id,
         "pincode": pin_code,
         "gasPrice": swap_builder["gasPrice"],
         "gas": swap_builder["gas"],
-        "value": bnb_value_to_swap,
+        "value": Web3.toWei(bnb_value_to_swap, "ether"),
         "to": swap_builder["to"],
         "data": swap_builder["data"],
         "type": swap_builder["type"],
     }
+    print(2)
     response = requests.post(
         f"https://api-wallet.venly.io/api/transactions/execute",
         json=data,
         headers=AUTH_HEADERS,
     ).json()
+    print(3)
     return response
 
 
@@ -198,7 +203,7 @@ def stake(wallet, pin_code, sc_address, amount_to_stake):
             "functionName": "stake",
             "value": 0,
             "inputs": [
-                {"type": "uint256", "value": amount_to_stake},
+                {"type": "uint256", "value": Web3.toWei(amount_to_stake, "ether")},
             ],
             "chainSpecificFields": {"gasLimit": "300000"},
         },
@@ -219,34 +224,46 @@ def get_transaction_status(tx_status):
     return response
 
 
-def execute_stake(wallet_address, bnb_to_stake):
+def execute_stake(wallet_address, usd_to_stake, bnb_to_stake):
     get_auth_token()
+    print(wallet_address, bnb_to_stake)
     pending_tx = MercuryoPendingStake.objects.filter(
-        wallet_address=wallet_address, bnb_amount=bnb_to_stake
+        wallet_address=wallet_address, usd_amount=usd_to_stake
     )[0]
-    sc_address = pending_tx.wallet_address
+    sc_address = pending_tx.smart_contract_address
     wallet = get_wallet_by_address(wallet_address)
     swap_rates = get_swap_rates(bnb_to_stake)
     fnd_to_receive = swap_rates["result"]["bestRate"]["outputAmount"]
-    swap_builder(wallet, PIN_CODE, bnb_to_stake, fnd_to_receive)
-    tx_hash = execute_swap_transaction(wallet, PIN_CODE, swap_builder, bnb_to_stake)[
-        "result"
-    ]["transactionHash"]
+    swap_builder_response = swap_builder(wallet, PIN_CODE, bnb_to_stake, fnd_to_receive)
+    tx_hash = execute_swap_transaction(
+        wallet, PIN_CODE, swap_builder_response, bnb_to_stake
+    )
+    tx_hash = tx_hash["result"]["transactionHash"]
     while True:
+        print("while True 1")
         get_auth_token()
         tx = get_transaction_status(tx_hash)
         if tx["success"] == True:
             if tx["result"]["status"] == "SUCCEEDED":
                 break
+        else:
+            time.sleep(2)
     tx_hash = approve_smart_contract(wallet, PIN_CODE, sc_address)
+    tx_hash = tx_hash["result"]["transactionHash"]
     while True:
+        print("while True 2")
         get_auth_token()
         tx = get_transaction_status(tx_hash)
+        print(tx["success"], tx)
         if tx["success"] == True:
             if tx["result"]["status"] == "SUCCEEDED":
                 break
+        else:
+            time.sleep(2)
     tx_hash = stake(wallet, PIN_CODE, sc_address, fnd_to_receive)
+    tx_hash = tx_hash["result"]["transactionHash"]
     while True:
+        print("while True 3")
         get_auth_token()
         tx = get_transaction_status(tx_hash)
         if tx["success"] == True:
@@ -257,6 +274,8 @@ def execute_stake(wallet_address, bnb_to_stake):
                     "hash": tx_hash,
                     "project": pending_tx.project_id,
                 }
+            else:
+                time.sleep(2)
 
 
 get_auth_token()

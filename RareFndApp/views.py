@@ -552,11 +552,13 @@ def mercuryo_callback_wallet_received_bnb(request):
     if data["status"] == "completed":
         usd_amount_to_stake = data["fiat_amount"]
         bnb_to_stake = data["amount"]
-        wallet_address = data["status"]
+        wallet_address = data["tx"]["address"]
         MercuryoPendingStake.objects.filter(
             wallet_address=wallet_address, usd_amount=usd_amount_to_stake
         ).update(bnb_amount=bnb_to_stake)
-        response = venly.execute_stake(wallet_address, bnb_to_stake)
+        response = venly.execute_stake(
+            wallet_address, usd_amount_to_stake, bnb_to_stake
+        )
         if response != None:
             serializer = PendingContributionSerializer(data=response)
             if serializer.is_valid():

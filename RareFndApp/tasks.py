@@ -106,7 +106,15 @@ def check_pending_contributions():
             # tx_recipient = decoded_tx[1]['recipient']
             tx_recipient = receipt["to"]
             # tx_amount in usd
-            tx_amount = decoded_tx[1]["usdAmount"] / 1000000000000000000
+            try:
+                tx_amount = decoded_tx[1]["usdAmount"] / 1000000000000000000
+            except KeyError:
+                if decoded_tx[1]["stakeAmount"]:
+                    tx_amount = (
+                        decoded_tx[1]["stakeAmount"] / 1000000000000000000
+                    ) * get_fnd_usd_value(FND, BNB, BUSD, FND_BNB, router_pancake_swap)[
+                        "fnd_usd"
+                    ]
             tx_timestamp = web3.eth.get_block(tx_block_number)["timestamp"]
             tx_project_live = getattr(tx_project, "live")
             tx_project_live_datetime = getattr(
