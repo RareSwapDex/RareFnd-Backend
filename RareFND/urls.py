@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, register_converter
 from django.urls import include, re_path
 from RareFndApp import views, tasks
 from rest_framework import routers
@@ -26,7 +26,9 @@ from rest_framework_simplejwt.views import (
 )
 from RareFndApp.serializers import MyTokenObtainPairView
 from django_email_verification import urls as email_urls
+from RareFndApp.converters import FloatUrlParameterConverter
 
+register_converter(FloatUrlParameterConverter, "float")
 
 t1 = threading.Thread(target=tasks.start_tasks)
 t1.start()
