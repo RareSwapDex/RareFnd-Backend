@@ -44,6 +44,9 @@ urlpatterns = [
     path("api/user/signup/", views.signup_user),
     path("api/user/profile_info/", views.get_profile_info),
     path("api/user/update/", views.update_user),
+    path("api/user/reset_password/", views.user_reset_password),
+    path("api/user/check_reset_password_token/", views.check_reset_password_token),
+    path("api/user/change_password/", views.user_change_password),
     path("api/incentives/<int:project_id>/", views.incentives),
     path("api/profile/<int:user_id>/", views.user_info),
     path("api/user/verify_email/", include(email_urls)),
@@ -87,7 +90,6 @@ urlpatterns = [
         views.venly_create_wallet,
     ),
     path("api/mercuryo/payment_callback/", views.mercuryo_callback_wallet_received_bnb),
-    # kk
     path("api/auth/venly_auth/", views.get_venly_auth),
     path("api/venly_execute_swap/", views.venly_execute_swap),
 ]

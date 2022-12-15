@@ -81,10 +81,6 @@ EMAIL_HOST = "smtp.office365.com"
 EMAIL_PORT = 587
 EMAIL_HOST_USER = "dontreply@rarefnd.com"
 EMAIL_HOST_PASSWORD = "Rat2Jalil2!"
-# EMAIL_HOST_PASSWORD = os.environ.get(
-#     "RAREFND_DONT_REPLY_PASSWORD
-# )  # os.environ['password_key'] suggested
-# print("fsajkudhfas", EMAIL_HOST_PASSWORD)
 EMAIL_USE_TLS = True
 
 

@@ -72,6 +72,7 @@ class User(AbstractBaseUser):
     total_contributions = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    password_reset_token = models.CharField(null=True, blank=True, max_length=254)
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
 

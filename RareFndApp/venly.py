@@ -287,8 +287,8 @@ def execute_stake(wallet_address, usd_to_stake, bnb_to_stake):
                 time.sleep(2)
 
 
-get_auth_token()
-print(AUTH_HEADERS)
+# get_auth_token()
+# print(AUTH_HEADERS)
 # wallet = get_or_create_wallet("jaliltest3@gmail.com")
 # # wallet_fnd_balance = get_fnd_balance(wallet)
 # # wallet_bnb_balance = get_BNB_balance(wallet)

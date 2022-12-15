@@ -49,6 +49,7 @@ import random
 import string
 import requests
 from . import venly
+from django.core.mail import send_mail
 
 
 S3_BUCKET_KEY = settings.AWS_SECRET_ACCESS_KEY
@@ -572,3 +573,68 @@ def mercuryo_callback_wallet_received_bnb(request):
             ).delete()
     # return Response(response, status=status.HTTP_200_OK)
     return Response({"ok": True}, status=status.HTTP_200_OK)
+
+
+def backend_send_email(subject, message, email_from, recipient_list):
+    subject = subject
+    message = message
+    email_from = email_from
+    recipient_list = recipient_list
+    send_mail(subject, message, email_from, recipient_list)
+
+
+@api_view(["POST"])
+def user_reset_password(request):
+    email = request.data["email"]
+    # Check if email exists in our database
+    user = User.objects.filter(email=email)
+    if not user:
+        return Response(status=status.HTTP_200_OK)
+    # add token to password_reset_token User field
+    token = "".join(random.choices(string.ascii_uppercase + string.digits, k=254))
+    reset_password_email_link = (
+        f"https://rarefnd.com/user/reset_password/{email}/{token}"
+    )
+    User.objects.filter(email=email).update(password_reset_token=token)
+    backend_send_email(
+        subject="RareFnd: Reset password",
+        message=f"Please click on the link bellow to reset your password\n{reset_password_email_link}",
+        email_from=settings.EMAIL_HOST_USER,
+        recipient_list=[
+            email,
+        ],
+    )
+    return Response(status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+def check_reset_password_token(request):
+    email = request.data["email"]
+    token = request.data["token"]
+    user = User.objects.filter(email=email)
+    if not user:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    user = user[0]
+    user_token = user.password_reset_token
+    if token != user_token or token == "" or token is None:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    return Response(status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+def user_change_password(request):
+    email = request.data["email"]
+    password = request.data["password"]
+    token = request.data["token"]
+    user = User.objects.filter(email=email)
+    if not user:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    user = user[0]
+    user_token = user.password_reset_token
+    if token != user_token or token == "" or token is None:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    user.set_password(password)
+    user.save()
+    new_token = "".join(random.choices(string.ascii_uppercase + string.digits, k=254))
+    User.objects.filter(email=email).update(password_reset_token=new_token)
+    return Response(status=status.HTTP_200_OK)
