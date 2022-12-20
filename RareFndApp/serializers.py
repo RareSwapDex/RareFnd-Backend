@@ -38,6 +38,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     number_of_subscribed_users = serializers.ReadOnlyField()
     owner_username = serializers.ReadOnlyField()
     number_of_donators = serializers.ReadOnlyField()
+    owner_profile_picture = serializers.ReadOnlyField()
 
     # create a meta class
     class Meta:
@@ -47,6 +48,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "id",
             "owner",
             "owner_username",
+            "owner_profile_picture",
             "title",
             "staking_address",
             "staking_abi",

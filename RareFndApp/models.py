@@ -15,6 +15,7 @@ class UserManager(BaseUserManager):
         password,
         first_name=None,
         last_name=None,
+        profile_picture=None,
         phone=None,
         wallet_address=None,
         total_contributions=0,
@@ -28,6 +29,7 @@ class UserManager(BaseUserManager):
             username=username,
             first_name=first_name,
             last_name=last_name,
+            profile_picture=profile_picture,
             bio=bio,
             phone=phone,
             wallet_address=wallet_address,
@@ -57,12 +59,22 @@ class UserManager(BaseUserManager):
         return user
 
 
+def get_users_files_directory(instance, filename):
+    if type(instance) is User:
+        return f"users/{instance.username}/{filename}"
+
+
 class User(AbstractBaseUser):
     username = models.CharField(max_length=20, unique=True, null=False, blank=False)
     email = models.EmailField(max_length=254, unique=True, null=False, blank=False)
     password = models.CharField(max_length=254, null=False, blank=False)
     first_name = models.CharField(null=True, blank=True, max_length=50)
     last_name = models.CharField(null=True, blank=True, max_length=50)
+    profile_picture = models.ImageField(
+        blank=True,
+        null=True,
+        upload_to=get_users_files_directory,
+    )
     bio = models.TextField(max_length=10000, null=True, blank=True, default="")
     phone = PhoneNumberField(null=True, blank=True)
     wallet_address = models.CharField(
@@ -267,6 +279,10 @@ class Project(models.Model):
     @property
     def owner_username(self):
         return self.owner.username
+
+    @property
+    def owner_profile_picture(self):
+        return self.owner.profile_picture.url
 
     @property
     def number_of_donators(self):

@@ -123,6 +123,7 @@ class UserAdmin(BaseUserAdmin):
                     "username",
                     "first_name",
                     "last_name",
+                    "profile_picture",
                     "bio",
                     "phone",
                     "wallet_address",

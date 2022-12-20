@@ -373,6 +373,7 @@ def projects_from_category(request, category_name):
             return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method == "GET":
         serializer = ProjectSerializer(projects, many=True)
+        pprint(serializer.data)
         return Response({"projects": serializer.data})
 
 
