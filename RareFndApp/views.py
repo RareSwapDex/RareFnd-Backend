@@ -428,14 +428,15 @@ def unique_record(request, field_to_check, field_value):
 def signup_user(request):
     if request.method == "POST":
         try:
+            pprint(request.data)
             unverifiedUser = get_user_model().objects.create(
                 username=request.data["username"],
                 password=make_password(request.data["password"]),
                 email=request.data["email"],
-                first_name=request.data["first_name"],
-                last_name=request.data["last_name"],
-                phone=request.data["phone"],
-                wallet_address=request.data["wallet_address"],
+                first_name=request.data.get("first_name"),
+                last_name=request.data.get("last_name"),
+                phone=request.data.get("phone"),
+                wallet_address=request.data.get("wallet_address"),
             )
             unverifiedUser.is_active = False
             try:
