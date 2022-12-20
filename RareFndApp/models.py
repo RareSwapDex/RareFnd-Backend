@@ -282,7 +282,11 @@ class Project(models.Model):
 
     @property
     def owner_profile_picture(self):
-        return self.owner.profile_picture.url
+        return (
+            self.owner.profile_picture.url
+            if self.owner.profile_picture
+            else "https://rarefnd-bucket.s3.us-east-2.amazonaws.com/users/avatar.jpg"
+        )
 
     @property
     def number_of_donators(self):
