@@ -6,7 +6,7 @@
 	</head>
 	<body>
 		{% if success %}
-		<h1>{{ user.username }}, your email is confirmed!</h1>
+		<h1>Welcome, {{ user.username }}, your email has been confirmed!</h1>
 		{% else %}
 		<h1>Error, invalid token!</h1>
 		{% endif %}
