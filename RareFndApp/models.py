@@ -4,6 +4,7 @@ from ckeditor.fields import RichTextField
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.core.validators import FileExtensionValidator
 from django.db.models import JSONField
+import datetime as dt
 
 
 class UserManager(BaseUserManager):
@@ -401,6 +402,9 @@ class MercuryoPendingStake(models.Model):
     staking_transaction_hash = models.CharField(
         max_length=254, null=True, blank=True, default="None"
     )
+    contribution_datetime = models.DateTimeField(
+        auto_now_add=True, blank=False, null=False
+    )
 
     def __str__(self):
-        return f"{self.wallet_address} {self.smart_contract_address} {self.usd_amount}"
+        return f"{self.wallet_address} {self.smart_contract_address} {self.usd_amount} | {self.contribution_datetime}"
