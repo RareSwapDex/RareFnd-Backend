@@ -566,15 +566,26 @@ def mercuryo_callback_wallet_received_bnb(request):
         response = venly.execute_stake(
             wallet_address, usd_amount_to_stake, bnb_to_stake
         )
-        if response != None:
-            serializer = PendingContributionSerializer(data=response)
-            if serializer.is_valid():
-                serializer.save()
-            MercuryoPendingStake.objects.filter(
-                staking_transaction_hash=response["hash"]
-            ).delete()
+        if response is None:
+            return Response(
+                {
+                    "NOT STAKED": "Could NOT stake: 'venly.execute_stake' function returned None, this means that there is no pending contribution found with less than 4 hours 'threshold', otherwise something wrong wend with the staking operation"
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        serializer = PendingContributionSerializer(data=response)
+        if serializer.is_valid():
+            serializer.save()
+        MercuryoPendingStake.objects.filter(
+            staking_transaction_hash=response["hash"]
+        ).delete()
     # return Response(response, status=status.HTTP_200_OK)
-    return Response({"ok": True}, status=status.HTTP_200_OK)
+    return Response(
+        {
+            "OK": f"Address {wallet_address} staked {bnb_to_stake}BNB to project id {response['project']}, tx hash: {response['hash']}"
+        },
+        status=status.HTTP_200_OK,
+    )
 
 
 def backend_send_email(subject, message, email_from, recipient_list):

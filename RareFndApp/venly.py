@@ -1,3 +1,4 @@
+from datetime import timedelta
 import requests
 from django.conf import settings
 import urllib
@@ -7,6 +8,7 @@ import json
 from .models import MercuryoPendingStake
 import time
 from web3 import Web3
+from django.utils import timezone
 
 
 # CLIENT_ID = settings.CLIENT_ID
@@ -225,9 +227,15 @@ def get_transaction_status(tx_status):
 def execute_stake(wallet_address, usd_to_stake, bnb_to_stake):
     get_auth_token()
     pin_code = PIN_CODE
+    # Only contributions which happened in the last 4 hours
+    current_time = timezone.now()
+    time_threshold = current_time - timedelta(hours=4)
     pending_tx = MercuryoPendingStake.objects.filter(
-        wallet_address__iexact=wallet_address
+        wallet_address__iexact=wallet_address, contribution_datetime__gte=time_threshold
     )[0]
+    if not pending_tx:
+        return
+    pending_tx = pending_tx[0]
     sc_address = pending_tx.smart_contract_address
     wallet = get_wallet_by_address(wallet_address)
     bnb_to_stake = str(float(bnb_to_stake) - 0.003)
@@ -244,8 +252,6 @@ def execute_stake(wallet_address, usd_to_stake, bnb_to_stake):
             tx_hash = execute_swap_transaction(
                 wallet, pin_code, swap_builder_response, bnb_to_stake
             )
-    print("lplplpl")
-    pprint(tx_hash)
     tx_hash = tx_hash["result"]["transactionHash"]
     while True:
         get_auth_token()
@@ -269,7 +275,6 @@ def execute_stake(wallet_address, usd_to_stake, bnb_to_stake):
     print(get_BNB_balance(wallet))
     wallet_fnd_balance = get_fnd_balance(wallet) - 1
     tx_hash = stake(wallet, pin_code, sc_address, wallet_fnd_balance)
-    print("aaaa")
     pprint(tx_hash)
     tx_hash = tx_hash["result"]["transactionHash"]
     while True:
