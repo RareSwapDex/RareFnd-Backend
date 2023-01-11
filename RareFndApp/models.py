@@ -26,7 +26,7 @@ class UserManager(BaseUserManager):
             raise ValueError("Users must have an email address")
 
         user = self.model(
-            email=self.normalize_email(email.lower()),
+            email=self.normalize_email(email),
             username=username,
             first_name=first_name,
             last_name=last_name,
@@ -65,9 +65,14 @@ def get_users_files_directory(instance, filename):
         return f"users/{instance.username}/{filename}"
 
 
+class LowerCaseCharField(models.CharField):
+    def get_prep_value(self, value):
+        return str(value).lower()
+
+
 class User(AbstractBaseUser):
     username = models.CharField(max_length=20, unique=True, null=False, blank=False)
-    email = models.EmailField(max_length=254, unique=True, null=False, blank=False)
+    email = LowerCaseCharField(max_length=254, unique=True, null=False, blank=False)
     password = models.CharField(max_length=254, null=False, blank=False)
     first_name = models.CharField(null=True, blank=True, max_length=50)
     last_name = models.CharField(null=True, blank=True, max_length=50)
@@ -260,6 +265,7 @@ class Project(models.Model):
     # company_white_paper_url = models.CharField(max_length=1000, null=True, blank=True)
     # company_tokenomics_url = models.CharField(max_length=1000, null=True, blank=True)
     company_ubos = JSONField(null=True, default=dict, blank=True)
+    wallet_address = models.CharField(max_length=254, null=True, blank=True)
 
     current_reward = models.FloatField(null=False, blank=False, default=0)
     raised_amount = models.FloatField(null=True, blank=True, default=0)

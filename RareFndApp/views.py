@@ -205,13 +205,14 @@ def add_project(request):
                 company_tax_identification_number=request.data.get(
                     "payment.taxIdNumber"
                 ),
+                wallet_address=request.data.get("payment.ownerWalletAddress"),
                 # company_white_paper_url=request.data.get("payment.whitePaperUrl"),
                 # company_tokenomics_url=request.data.get("payment.tokenomicsUrl"),
-                company_ubos=[
-                    {ubo_data: request.data[ubo_data]}
-                    for ubo_data in request.data
-                    if ubo_data.startswith("payment.UBOs") and "File" not in ubo_data
-                ],
+                # company_ubos=[
+                #     {ubo_data: request.data[ubo_data]}
+                #     for ubo_data in request.data
+                #     if ubo_data.startswith("payment.UBOs") and "File" not in ubo_data
+                # ],
             )
             project.clean()
             project.save()
