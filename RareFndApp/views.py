@@ -458,6 +458,12 @@ def update_user(request):
         user = User.objects.get(pk=request.user.id)
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+    data = request.data
+    if data.get("profile_picture.0") and type(data.get("profile_picture.0")) != str:
+        data["profile_picture"] = File(
+            io.BytesIO(data["profile_picture.0"].read()),
+            name=data["profile_picture.0"].__str__(),
+        )
     serializer = UserSerializer(user, data=request.data)
     if serializer.is_valid():
         serializer.save()
