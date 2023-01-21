@@ -669,8 +669,6 @@ def user_change_password(request):
 
 @api_view(["POST"])
 def coinbase_create_charge(request):
-    print("--------------------------")
-    pprint(request.data)
     client = Client(api_key=config("COINBASE_API_KEY"))
     project_name = request.data.get("projectName")
     contributor_email = request.data.get("contributorEmail")
@@ -699,7 +697,6 @@ def coinbase_webhook(request):
     # request_data = json.dumps(request.data)
     request_data = request.body.decode("utf-8")
     request_sig = request.headers.get("X-CC-Webhook-Signature", None)
-    print("kikikikikiki", request_sig)
     try:
         # signature verification and event object construction
         event = Webhook.construct_event(
@@ -709,7 +706,6 @@ def coinbase_webhook(request):
         print(e)
         return Response({"message": f"{str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
-    pprint(event)
     if event["type"] == "charge:confirmed":
         project_id = int(event["data"]["metadata"]["project_id"])
         contributor_email = event["data"]["metadata"]["contributor_email"]
