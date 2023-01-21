@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 from pathlib import Path
 import os
 from datetime import timedelta
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,16 +25,18 @@ MEDIA_URL = "files/"
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-z27p4p4(jf+k#%8+6&=%9ggt-b&4^5ro^m!tl6&ab-tnrlo_k-"
+SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", default=False, cast=bool)
+
+RAREFND_URL = "https://www.rarefnd.com/"
 
 ALLOWED_HOSTS = [
     "rarefndapi.herokuapp.com",
     "127.0.0.1",
     "localhost",
-    "37de-94-203-239-86.ngrok.io",
+    "bb41-2-50-43-16.ngrok.io",
     "192.168.0.92",
 ]
 
@@ -58,6 +61,7 @@ INSTALLED_APPS = [
     "django_email_verification",
     "storages",
     "requests",
+    # "coinbase_commerce",
 ]
 
 
@@ -66,7 +70,7 @@ def verified_callback(user):
 
 
 EMAIL_VERIFIED_CALLBACK = verified_callback
-EMAIL_FROM_ADDRESS = "dontreply@rarefnd.com"
+EMAIL_FROM_ADDRESS = config("EMAIL_FROM_ADDRESS")
 EMAIL_MAIL_SUBJECT = "Confirm your email {{ user.username }}"
 EMAIL_MAIL_HTML = "email_verification.html"
 EMAIL_MAIL_PLAIN = "email_verification_plain.txt"
@@ -79,8 +83,8 @@ EMAIL_MULTI_USER = True  # optional (defaults to False)
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.office365.com"
 EMAIL_PORT = 587
-EMAIL_HOST_USER = "dontreply@rarefnd.com"
-EMAIL_HOST_PASSWORD = "Rat2Jalil2!"
+EMAIL_HOST_USER = config("EMAIL_FROM_ADDRESS")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = True
 
 
@@ -194,8 +198,8 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "d8q7g3cng193np",
-        "USER": "taiiukyggxpvfx",
-        "PASSWORD": "5c185af73e99aca5864511ff17a42801b749dab8be930f972c34b86197d0e26a",
+        "USER": config("DATABASE_USER"),
+        "PASSWORD": config("DATABASE_PASSWORD"),
         "HOST": "ec2-3-219-19-205.compute-1.amazonaws.com",
         "PORT": "5432",
     }
@@ -256,8 +260,8 @@ TEMPLATE_DIRS = (os.path.join(BASE_DIR, "/RareFndApp/templates"),)
 
 # S3 BUCKETS CONFIG
 AWS_QUERYSTRING_AUTH = False
-AWS_ACCESS_KEY_ID = "AKIATCFZ6A4SVN5M5FON"
-AWS_SECRET_ACCESS_KEY = "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"
+AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = "rarefnd-bucket"
 AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL = None
@@ -267,5 +271,5 @@ AWS_S3_REGION_NAME = "us-east-2"
 AWS_S3_SIGNATURE_VERSION = "s3v4"
 
 # Venly creds
-CLIENT_ID = "TheRareAntiquities-capsule"
-CLIENT_SECRET = "0d6aa5fe-97ea-40f9-b839-276240448758"
+CLIENT_ID = config("VENLY_CLIENT_ID")
+CLIENT_SECRET = config("VENLY_CLIENT_SECRET")

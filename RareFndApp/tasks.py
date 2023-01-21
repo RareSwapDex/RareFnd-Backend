@@ -139,7 +139,7 @@ def check_pending_contributions():
                     hash=tx["hash"],
                 )
                 contribution.save()
-                # Add amount to project rased_amount
+                # Add amount to project raised_amount
                 project_raised_amount = getattr(tx_project, "raised_amount")
                 Project.objects.filter(pk=tx["project"]).update(
                     raised_amount=project_raised_amount + tx_amount

@@ -353,10 +353,12 @@ class Incentive(models.Model):
 
 class Contribution(models.Model):
     contributor_wallet_address = models.CharField(max_length=254, null=True, blank=True)
+    contributor_email = models.CharField(max_length=254, null=True, blank=True)
     project = models.ForeignKey(
         Project, null=False, blank=False, on_delete=models.CASCADE
     )
     amount = models.FloatField(null=False, blank=False)
+    contribution_method = models.CharField(max_length=254, default="FND")
     contribution_datetime = models.DateTimeField(auto_now_add=True)
     hash = models.CharField(max_length=254, null=False, blank=False, unique=True)
 

@@ -1,6 +1,7 @@
 from http.client import BAD_REQUEST
 from pprint import pprint
 from django.http import HttpResponse, JsonResponse
+import json
 from django.core.files.images import ImageFile, File
 import io
 from .serializers import (
@@ -50,12 +51,18 @@ import string
 import requests
 from . import venly
 from django.core.mail import send_mail
+from coinbase_commerce.client import Client
+from coinbase_commerce.webhook import Webhook
+from coinbase_commerce.error import WebhookInvalidPayload, SignatureVerificationError
+from decouple import config
+from .models_helper_functions import *
 
 
 S3_BUCKET_KEY = settings.AWS_SECRET_ACCESS_KEY
 S3_BUCKET_NAME = settings.AWS_STORAGE_BUCKET_NAME
 CLIENT_ID = settings.CLIENT_ID
 CLIENT_SECRET = settings.CLIENT_SECRET
+RAREFND_URL = settings.RAREFND_URL
 
 s3_session = boto3.Session(
     aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
@@ -658,3 +665,69 @@ def user_change_password(request):
     new_token = "".join(random.choices(string.ascii_uppercase + string.digits, k=254))
     User.objects.filter(email=email).update(password_reset_token=new_token)
     return Response(status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+def coinbase_create_charge(request):
+    print("--------------------------")
+    pprint(request.data)
+    client = Client(api_key=config("COINBASE_API_KEY"))
+    project_name = request.data.get("projectName")
+    contributor_email = request.data.get("contributorEmail")
+    project_contract_address = request.data.get("projectContractAddress")
+    contribution_amount = request.data.get("contributionAmount")
+    project_id = request.data.get("projectId")
+    project_url = request.data.get("projectURL")
+    contribution = {
+        "name": project_name,
+        "local_price": {"amount": contribution_amount, "currency": "USD"},
+        "pricing_type": "fixed_price",
+        "redirect_url": f"{project_url}?payment_status=success",
+        "cancel_url": f"{project_url}?payment_status=failed",
+        "metadata": {
+            "contributor_email": contributor_email,
+            "project_contract_address": project_contract_address,
+            "project_id": project_id,
+        },
+    }
+    charge = client.charge.create(**contribution)
+    return Response({"message": "success", "data": charge}, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+def coinbase_webhook(request):
+    # request_data = json.dumps(request.data)
+    request_data = request.body.decode("utf-8")
+    request_sig = request.headers.get("X-CC-Webhook-Signature", None)
+    print("kikikikikiki", request_sig)
+    try:
+        # signature verification and event object construction
+        event = Webhook.construct_event(
+            request_data, request_sig, config("COINBASE_WEBHOOK_SECRET")
+        )
+    except (WebhookInvalidPayload, SignatureVerificationError) as e:
+        print(e)
+        return Response({"message": f"{str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+    pprint(event)
+    if event["type"] == "charge:confirmed":
+        project_id = int(event["data"]["metadata"]["project_id"])
+        contributor_email = event["data"]["metadata"]["contributor_email"]
+        contribution_amount = float(
+            event["data"]["payments"][0]["net"]["local"]["amount"]
+        )
+        contribution_hash = event["data"]["payments"][0]["transaction_id"]
+        # Add contribution to "Contribution" table
+        add_contribution_to_contribution_table(
+            "0",
+            contributor_email,
+            project_id,
+            contribution_amount,
+            "coinbase",
+            contribution_hash,
+        )
+        # Add amount to project rased_amount
+        add_amount_to_project_raised_amount(project_id, contribution_amount)
+        # Check if project reached target amount
+        check_project_reached_target(project_id)
+    return Response({"message": "success"}, status=status.HTTP_200_OK)

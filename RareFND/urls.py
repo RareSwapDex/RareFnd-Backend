@@ -92,4 +92,6 @@ urlpatterns = [
     path("api/mercuryo/payment_callback/", views.mercuryo_callback_wallet_received_bnb),
     path("api/auth/venly_auth/", views.get_venly_auth),
     path("api/venly_execute_swap/", views.venly_execute_swap),
+    path("api/coinbase/webhook/", views.coinbase_webhook),
+    path("api/coinbase/create-charge/", views.coinbase_create_charge),
 ]
