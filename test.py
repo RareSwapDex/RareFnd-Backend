@@ -1,21 +1,40 @@
-# from pprint import pprint
-# import shopify
+from pprint import pprint
+import shopify
 from decouple import config
+from rich import print
 
-
+with open("bulk.csv", "w") as file:
+    file.write(
+        "Handle	Title	Body (HTML)	Vendor	Product Category	Type	Tags	Published	Option1 Name	Option1 Value	Option2 Name	Option2 Value	Option3 Name	Option3 Value	Variant SKU	Variant Grams	Variant Inventory Tracker	Variant Inventory Qty	Variant Inventory Policy	Variant Fulfillment Service	Variant Price	Variant Compare At Price	Variant Requires Shipping	Variant Taxable	Variant Barcode	Image Src	Image Position	Image Alt Text	Gift Card	SEO Title	SEO Description	Google Shopping / Google Product Category	Google Shopping / Gender	Google Shopping / Age Group	Google Shopping / MPN	Google Shopping / AdWords Grouping	Google Shopping / AdWords Labels	Google Shopping / Condition	Google Shopping / Custom Product	Google Shopping / Custom Label 0	Google Shopping / Custom Label 1	Google Shopping / Custom Label 2	Google Shopping / Custom Label 3	Google Shopping / Custom Label 4	Variant Image	Variant Weight Unit	Variant Tax Code	Cost per item	Price / International	Compare At Price / International	Status"
+    )
+    for i in range(500000):
+        print(f"RAREFND-CONTRIBUTION-{i+1}")
+    exit()
 SHOPIFY_TOKEN = config("SHOPIFY_TOKEN")
-# SHOP_URL = config("SHOPIFY_SHOP_URL")
-# SHOPIFY_API = config("SHOPIFY_API_VERSION")
-# session = shopify.Session(SHOP_URL, SHOPIFY_API, SHOPIFY_TOKEN)
-# shopify.ShopifyResource.activate_session(session)
+SHOPIFY_STORFRONT_TOKEN = config("SHOPIFY_STORFRONT_TOKEN")
+SHOP_URL = config("SHOPIFY_SHOP_URL")
+SHOPIFY_API = config("SHOPIFY_API_VERSION")
+session = shopify.Session(SHOP_URL, SHOPIFY_API, SHOPIFY_TOKEN)
 
-# # products = shopify.Product.find(limit=10)
-# # for product in products:
-# #     pprint(str(product.to_dict()))
-# #     # Iterate through each variant
-# #     # for variant in product.variants:
-# #     #     # Print the variant_id
-# #     #     print(variant.id)
+shopify.ShopifyResource.activate_session(session)
+
+# response = shopify.Checkout.create(
+#     {
+#         "checkout": {
+#             "email": "jelo@bld.ai",
+#             "line_items": [{"variant_id": 44371994738988, "quantity": 1}],
+#         }
+#     }
+# )
+# print(response)
+# products = shopify.Product.find(limit=10)
+# for product in products:
+#     pprint(str(product.to_dict()))
+#     # Iterate through each variant
+#     for variant in product.variants:
+#         # Print the variant_id
+#         print(variant.id)
+exit()
 
 
 # def shopify_create_product(

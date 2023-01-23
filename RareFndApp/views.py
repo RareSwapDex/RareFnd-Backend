@@ -68,6 +68,7 @@ RAREFND_URL = settings.RAREFND_URL
 COINBASE_WEBHOOK_SECRET = config("COINBASE_WEBHOOK_SECRET")
 COINBASE_API_KEY = config("COINBASE_API_KEY")
 STRIPE_API_KEY = config("STRIPE_API_KEY")
+STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET")
 stripe.api_key = STRIPE_API_KEY
 
 
@@ -774,13 +775,33 @@ def stripe_create_charge(request):
         mode="payment",
     )
     return Response(
-        {"message": "success", "data": checkout["url"]}, status=status.HTTP_200_OK
+        {"message": "success", "hosted_url": checkout["url"]}, status=status.HTTP_200_OK
     )
 
 
 @api_view(["POST"])
 def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.META["HTTP_STRIPE_SIGNATURE"]
+    event = None
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError as e:
+        # Invalid payload
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError as e:
+
+        # Invalid signature
+        return HttpResponse(status=400)
     # check payment success
+    if event.type == "payment_intent.succeeded":
+        payment_intent = event.data.object  # contains a stripe.PaymentIntent
+        pprint(payment_intent)
+        Response({"message": "success"}, status=status.HTTP_200_OK)
+        print("PaymentIntent was successful!")
     # Add contribution to "Contribution" table
     # Add amount to project rased_amount
     # Check if project reached target amount

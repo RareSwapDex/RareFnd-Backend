@@ -213,7 +213,7 @@ class Project(models.Model):
     fund_amount = models.FloatField(null=True, blank=False)
     # Story
     description = RichTextField(
-        max_length=10000,
+        max_length=100000,
         null=True,
         blank=False,
         external_plugin_resources=[
