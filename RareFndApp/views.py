@@ -730,10 +730,10 @@ def coinbase_webhook(request):
             "coinbase",
             contribution_hash,
         )
-        # Add amount to project rased_amount
-        add_amount_to_project_raised_amount(project_id, contribution_amount)
-        # Check if project reached target amount
-        check_project_reached_target(project_id)
+        # # Add amount to project rased_amount
+        # add_amount_to_project_raised_amount(project_id, contribution_amount)
+        # # Check if project reached target amount
+        # check_project_reached_target(project_id)
     return Response({"message": "success"}, status=status.HTTP_200_OK)
 
 
