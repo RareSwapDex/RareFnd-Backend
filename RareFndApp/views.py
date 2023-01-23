@@ -55,7 +55,9 @@ from coinbase_commerce.client import Client
 from coinbase_commerce.webhook import Webhook
 from coinbase_commerce.error import WebhookInvalidPayload, SignatureVerificationError
 from decouple import config
+import stripe
 from .models_helper_functions import *
+from .shopify_helper_functions import *
 
 
 S3_BUCKET_KEY = settings.AWS_SECRET_ACCESS_KEY
@@ -63,6 +65,11 @@ S3_BUCKET_NAME = settings.AWS_STORAGE_BUCKET_NAME
 CLIENT_ID = settings.CLIENT_ID
 CLIENT_SECRET = settings.CLIENT_SECRET
 RAREFND_URL = settings.RAREFND_URL
+COINBASE_WEBHOOK_SECRET = config("COINBASE_WEBHOOK_SECRET")
+COINBASE_API_KEY = config("COINBASE_API_KEY")
+STRIPE_API_KEY = config("STRIPE_API_KEY")
+stripe.api_key = STRIPE_API_KEY
+
 
 s3_session = boto3.Session(
     aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
@@ -669,7 +676,7 @@ def user_change_password(request):
 
 @api_view(["POST"])
 def coinbase_create_charge(request):
-    client = Client(api_key=config("COINBASE_API_KEY"))
+    client = Client(api_key=COINBASE_API_KEY)
     project_name = request.data.get("projectName")
     contributor_email = request.data.get("contributorEmail")
     project_contract_address = request.data.get("projectContractAddress")
@@ -700,7 +707,7 @@ def coinbase_webhook(request):
     try:
         # signature verification and event object construction
         event = Webhook.construct_event(
-            request_data, request_sig, config("COINBASE_WEBHOOK_SECRET")
+            request_data, request_sig, COINBASE_WEBHOOK_SECRET
         )
     except (WebhookInvalidPayload, SignatureVerificationError) as e:
         print(e)
@@ -727,3 +734,100 @@ def coinbase_webhook(request):
         # Check if project reached target amount
         check_project_reached_target(project_id)
     return Response({"message": "success"}, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+def stripe_create_charge(request):
+    project_name = request.data.get("projectName")
+    contributor_email = request.data.get("contributorEmail")
+    project_contract_address = request.data.get("projectContractAddress")
+    contribution_amount = request.data.get("contributionAmount")
+    project_id = request.data.get("projectId")
+    project_url = request.data.get("projectURL")
+    # Create a product
+    product = stripe.Product.create(
+        name=project_name,
+        default_price_data={
+            "currency": "usd",
+            "unit_amount_decimal": float(contribution_amount) * 100,
+        },
+        metadata={
+            "name": project_name,
+            "contributor_email": contributor_email,
+            "project_contract_address": project_contract_address,
+            "project_id": project_id,
+        },
+    )
+    pprint(product)
+    price_id = product["default_price"]
+    # Create checkout for the price_id
+    checkout = stripe.checkout.Session.create(
+        success_url=f"{project_url}?payment_status=success",
+        cancel_url=f"{project_url}?payment_status=failed",
+        customer_email=contributor_email,
+        line_items=[
+            {
+                "price": price_id,
+                "quantity": 1,
+            },
+        ],
+        mode="payment",
+    )
+    return Response(
+        {"message": "success", "data": checkout["url"]}, status=status.HTTP_200_OK
+    )
+
+
+@api_view(["POST"])
+def stripe_webhook(request):
+    # check payment success
+    # Add contribution to "Contribution" table
+    # Add amount to project rased_amount
+    # Check if project reached target amount
+    pprint(request.data)
+
+
+@api_view(["POST"])
+def shopify_create_checkout(request):
+    project_name = request.data.get("projectName")
+    contributor_email = request.data.get("contributorEmail")
+    project_contract_address = request.data.get("projectContractAddress")
+    contribution_amount = request.data.get("contributionAmount")
+    project_id = request.data.get("projectId")
+    project_url = request.data.get("projectURL")
+    # Create a product
+    product = shopify_create_product(
+        project_name,
+        contribution_amount,
+        contributor_email,
+        project_contract_address,
+        project_id,
+    )
+    if not product["success"]:
+        return Response(
+            {"message": "failed", "data": "failed to create a checkout"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    pprint(product)
+    variant_id = product["variant_id"]
+    # Create checkout for the price_id
+    checkout = create_checkout(
+        variant_id,
+        contributor_email,
+        f"{project_url}?payment_status=success",
+        f"{project_url}?payment_status=failed",
+    )
+    return (
+        Response(
+            {"message": "success", "data": checkout["web_url"]},
+            status=status.HTTP_200_OK,
+        )
+        if checkout["success"]
+        else Response(
+            {
+                "message": "failed",
+                "data": "created product but failed to create a checkout",
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    )

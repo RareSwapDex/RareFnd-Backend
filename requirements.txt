@@ -119,3 +119,5 @@ boto3==1.24.70
 django-storages==1.13.1
 coinbase-commerce==1.0.1
 python-decouple==3.6
+stripe==5.0.0
+ShopifyAPI==12.2.0

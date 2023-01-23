@@ -94,4 +94,8 @@ urlpatterns = [
     path("api/venly_execute_swap/", views.venly_execute_swap),
     path("api/coinbase/webhook/", views.coinbase_webhook),
     path("api/coinbase/create-charge/", views.coinbase_create_charge),
+    path("api/stripe/webhook/", views.stripe_webhook),
+    path("api/stripe/create-charge/", views.stripe_create_charge),
+    # path("api/shopify/webhook/", views.shopify_webhook),
+    path("api/shopify/create-charge/", views.shopify_create_checkout),
 ]
