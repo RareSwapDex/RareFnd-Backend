@@ -35,7 +35,6 @@ def shopify_create_product(
                 }
             ],
             "product_type": "Digital",
-            "tags": ["Barnes \u0026 Noble", "Big Air", "John's Fav"],
             "metafields": [
                 {
                     "name": name,
@@ -44,6 +43,7 @@ def shopify_create_product(
                     "project_id": project_id,
                 }
             ],
+            "collections": [{"id": 433169465644}],
         }
     }
     headers = {
@@ -56,6 +56,17 @@ def shopify_create_product(
         data=json.dumps(product_data),
     )
     pprint(response)
+    # Parse the response
+    product = response.json()["product"]
+
+    # Add the product to the collection
+    collection_id = 433169465644
+    product_id = product["id"]
+
+    url = f"https://rarefnd.myshopify.com/admin/api/2021-10/collections/{collection_id}/products.json"
+    data = {"product_id": product_id}
+    response = requests.post(url, headers=headers, data=json.dumps(data))
+    print("okokokok", response, response.text)
     if response.status_code != 201:
         return {"success": False}
     response_json = response.json()

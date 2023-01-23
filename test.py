@@ -1,7 +1,8 @@
-# from pprint import pprint
+from pprint import pprint
+
 # import shopify
 from decouple import config
-
+from datetime import datetime
 
 SHOPIFY_TOKEN = config("SHOPIFY_TOKEN")
 # SHOP_URL = config("SHOPIFY_SHOP_URL")
@@ -79,42 +80,93 @@ SHOPIFY_TOKEN = config("SHOPIFY_TOKEN")
 import json
 import requests
 
-# Shopify API endpoint
-shopify_url = "https://rarefnd.myshopify.com/admin/api/2021-01/products.json"
-
-# API access token
+# Define your Shopify store URL and access token
+store_url = "https://rarefnd.myshopify.com"
 access_token = SHOPIFY_TOKEN
 
-# Product data
-data = {
-    "product": {
-        "title": "My new product",
-        "published": True,
-        "available": True,
-        "variants": [{"price": "10.00", "sku": "my-new-product"}],
-        "options": [{"name": "Size"}],
-        # "metafields": [
-        #     {
-        #         "key": "custom_key",
-        #         "value": "custom_value",
-        #         "value_type": "string",
-        #         "namespace": "global",
-        #     }
-        # ],
-        # "images": [{"src": "https://example.com/my-new-product.jpg"}],
-        "tags": "new, product",
-        "channels": ["web", "mobile-app", "facebook", "pos"],
-    }
-}
+################################################################
 
-# Make the API request
 headers = {"X-Shopify-Access-Token": access_token}
-response = requests.post(shopify_url, headers=headers, json=data)
 
-# Check the response
-if response.status_code == 201:
-    response_json = response.json()
-    product_id = response_json["product"]["id"]
-    print("Product created successfully, product id :", product_id)
-else:
-    print(f"Error creating product: {response.status_code} - {response.text}")
+response = requests.get(
+    store_url + "/admin/api/2021-01/custom_collections.json", headers=headers
+)
+
+# Parse the response
+collections = response.json()["custom_collections"]
+
+# Print the collection names
+for collection in collections:
+    print(collection)
+exit()
+
+################################
+
+
+# GraphQL query to create a product
+query_create = """
+mutation {
+  productCreate(input: {
+    title: "My new product 77",
+    variants: [
+      {
+        price: "10.00",
+        sku: "new-product-sku",
+      }
+    ],
+  }) {
+    product {
+      id
+    }
+  }
+}
+"""
+
+# Headers for the request
+headers = {"Content-Type": "application/json", "X-Shopify-Access-Token": access_token}
+
+# Make the request
+response = requests.post(
+    f"{store_url}/admin/api/2020-04/graphql.json",
+    json={"query": query_create},
+    headers=headers,
+)
+
+# Parse the response
+response_json = json.loads(response.text)
+pprint(response_json)
+# Extract the product ID
+product_id = response_json["data"]["productCreate"]["product"]["id"]
+# GraphQL query to make the product available in all sales channels
+# Channel ID, publication ID, and publish date
+channel_id = "gid://shopify/Channel/12345"
+publication_id = "gid://shopify/Publication/67890"
+publish_date = "2022-10-01T00:00:00Z"
+
+# GraphQL query to make the product available in all sales channels
+query_publish = f"""
+mutation {{
+  publishablePublish(id: "{product_id}", input: {{
+    channelId: "{channel_id}",
+    publicationId: "{publication_id}",
+    publishDate: "{publish_date}"
+  }}) {{
+    publishable {{
+      availablePublicationCount
+    }}
+  }}
+}}
+"""
+
+# Make the request
+response = requests.post(
+    f"{store_url}/admin/api/2020-04/graphql.json",
+    json={"query": query_publish},
+    headers=headers,
+)
+
+# Parse the response
+response_json = json.loads(response.text)
+print(response_json)
+# Print the publishable ID
+print(response_json["data"]["publishablePublish"]["publishable"]["id"])
