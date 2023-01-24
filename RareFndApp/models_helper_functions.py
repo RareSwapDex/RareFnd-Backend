@@ -52,7 +52,7 @@ def add_contribution_to_contribution_table(
         hash=contribution_hash,
         selected_incentive=Incentive.objects.get(pk=int(selected_incentive)),
         eligible_for_selected_incentive=contribution_amount
-        >= Incentive.objects.get(pk=int(selected_incentive)),
+        >= Incentive.objects.get(pk=int(selected_incentive)).price,
     )
     c.clean()
     c.save()

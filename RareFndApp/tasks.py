@@ -78,7 +78,10 @@ def check_pending_contributions():
     pending_contributions = serializer.data
     for p in pending_contributions:
         tx = dict(OrderedDict(p))
-        print("kkkk", tx)
+        selected_incentive = pk = PendingContribution.objects.get(
+            pk=tx["id"]
+        ).selected_incentive
+
         # Test if Tx hash already in Contribution table
         if Contribution.objects.filter(hash__iexact=tx["hash"]):
             PendingContribution.objects.filter(hash=tx["hash"]).delete()
@@ -133,9 +136,7 @@ def check_pending_contributions():
                 and datetime.fromtimestamp(tx_timestamp) > tx_project_live_datetime
             ):
                 # Add to contributions table
-                selected_incentive = Incentive.objects.get(pk=tx["selected_incentive"])
                 print("hoho", tx)
-                print(tx["selected_incentive"], selected_incentive)
                 contribution = Contribution(
                     contributor_wallet_address=receipt["from"].lower(),
                     project=tx_project,
@@ -153,7 +154,7 @@ def check_pending_contributions():
                 )
                 tx_project = Project.objects.get(pk=tx["project"])
                 # Remove pending contribution from the table
-                # PendingContribution.objects.filter(hash=tx["hash"]).delete()
+                PendingContribution.objects.filter(hash=tx["hash"]).delete()
                 # Check if project reached target amount
                 # tx_project_fund_amount = getattr(tx_project, "fund_amount")
                 # tx_project_raised_amount = getattr(tx_project, "raised_amount")
