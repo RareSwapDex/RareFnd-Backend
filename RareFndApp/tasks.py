@@ -78,7 +78,7 @@ def check_pending_contributions():
     pending_contributions = serializer.data
     for p in pending_contributions:
         tx = dict(OrderedDict(p))
-        selected_incentive = pk = PendingContribution.objects.get(
+        selected_incentive = PendingContribution.objects.get(
             pk=tx["id"]
         ).selected_incentive
 
@@ -143,10 +143,12 @@ def check_pending_contributions():
                     hash=tx["hash"],
                     selected_incentive=selected_incentive,
                     eligible_for_selected_incentive=tx_amount
-                    >= selected_incentive.price,
+                    >= selected_incentive.price
+                    if selected_incentive
+                    else False,
                 )
                 contribution.save()
-                if tx_amount >= selected_incentive.price:
+                if selected_incentive != None and tx_amount >= selected_incentive.price:
                     Incentive.objects.filter(id=int(selected_incentive.id)).update(
                         available_items=selected_incentive.available_items - 1
                     )

@@ -413,7 +413,9 @@ def pending_contributions_list(request):
             project=Project.objects.get(pk=request.data["project"]),
             selected_incentive=Incentive.objects.get(
                 pk=request.data["selected_incentive"]
-            ),
+            )
+            if request.data["selected_incentive"]
+            else None,
         )
         p_c.save()
         return Response(status=status.HTTP_201_CREATED)
