@@ -1,6 +1,6 @@
 import time
 from .serializers import PendingContributionSerializer
-from .models import PendingContribution, Contribution, Project, TokenPrice
+from .models import PendingContribution, Contribution, Project, TokenPrice, Incentive
 from collections import OrderedDict
 from web3 import Web3
 import traceback
@@ -78,6 +78,7 @@ def check_pending_contributions():
     pending_contributions = serializer.data
     for p in pending_contributions:
         tx = dict(OrderedDict(p))
+        print("kkkk", tx)
         # Test if Tx hash already in Contribution table
         if Contribution.objects.filter(hash__iexact=tx["hash"]):
             PendingContribution.objects.filter(hash=tx["hash"]).delete()
@@ -132,11 +133,17 @@ def check_pending_contributions():
                 and datetime.fromtimestamp(tx_timestamp) > tx_project_live_datetime
             ):
                 # Add to contributions table
+                selected_incentive = Incentive.objects.get(pk=tx["selected_incentive"])
+                print("hoho", tx)
+                print(tx["selected_incentive"], selected_incentive)
                 contribution = Contribution(
                     contributor_wallet_address=receipt["from"].lower(),
                     project=tx_project,
                     amount=tx_amount,
                     hash=tx["hash"],
+                    selected_incentive=selected_incentive,
+                    eligible_for_selected_incentive=tx_amount
+                    >= selected_incentive.price,
                 )
                 contribution.save()
                 # Add amount to project raised_amount
@@ -146,21 +153,21 @@ def check_pending_contributions():
                 )
                 tx_project = Project.objects.get(pk=tx["project"])
                 # Remove pending contribution from the table
-                PendingContribution.objects.filter(hash=tx["hash"]).delete()
+                # PendingContribution.objects.filter(hash=tx["hash"]).delete()
                 # Check if project reached target amount
-                tx_project_fund_amount = getattr(tx_project, "fund_amount")
-                tx_project_raised_amount = getattr(tx_project, "raised_amount")
-                tx_project_current_reward = getattr(tx_project, "current_reward")
-                # print(
-                #     tx_project_raised_amount + tx_project_current_reward,
-                #     tx_project_fund_amount,
-                #     (tx_project_raised_amount + tx_project_current_reward)
-                #     >= tx_project_fund_amount,
-                # )
-                if (
-                    tx_project_raised_amount + tx_project_current_reward
-                ) >= tx_project_fund_amount:
-                    Project.objects.filter(pk=tx["project"]).update(live=False)
+                # tx_project_fund_amount = getattr(tx_project, "fund_amount")
+                # tx_project_raised_amount = getattr(tx_project, "raised_amount")
+                # tx_project_current_reward = getattr(tx_project, "current_reward")
+                # # print(
+                # #     tx_project_raised_amount + tx_project_current_reward,
+                # #     tx_project_fund_amount,
+                # #     (tx_project_raised_amount + tx_project_current_reward)
+                # #     >= tx_project_fund_amount,
+                # # )
+                # if (
+                #     tx_project_raised_amount + tx_project_current_reward
+                # ) >= tx_project_fund_amount:
+                #     Project.objects.filter(pk=tx["project"]).update(live=False)
 
 
 def get_bnb_usd_value(bnb_address, busd_address, router_pancake_swap):

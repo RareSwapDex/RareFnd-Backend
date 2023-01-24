@@ -361,6 +361,10 @@ class Contribution(models.Model):
     contribution_method = models.CharField(max_length=254, default="FND")
     contribution_datetime = models.DateTimeField(auto_now_add=True)
     hash = models.CharField(max_length=254, null=False, blank=False, unique=True)
+    selected_incentive = models.ForeignKey(
+        Incentive, null=True, blank=True, on_delete=models.CASCADE
+    )
+    eligible_for_selected_incentive = models.BooleanField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.project} {self.contributor_wallet_address}"
@@ -370,6 +374,9 @@ class PendingContribution(models.Model):
     hash = models.CharField(max_length=254, null=False, blank=False, unique=True)
     project = models.ForeignKey(
         Project, null=False, blank=False, on_delete=models.CASCADE
+    )
+    selected_incentive = models.ForeignKey(
+        Incentive, null=True, blank=True, on_delete=models.CASCADE
     )
 
     def __str__(self):

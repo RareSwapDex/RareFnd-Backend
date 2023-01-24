@@ -408,11 +408,15 @@ def pending_contributions_list(request):
         serializer = PendingContributionSerializer(queryset, many=True)
         return Response({"pending_contributions": serializer.data})
     elif request.method == "POST":
-        serializer = PendingContributionSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(status=status.HTTP_201_CREATED)
-        print(serializer.errors)
+        p_c = PendingContribution(
+            hash=request.data["hash"],
+            project=Project.objects.get(pk=request.data["project"]),
+            selected_incentive=Incentive.objects.get(
+                pk=request.data["selected_incentive"]
+            ),
+        )
+        p_c.save()
+        return Response(status=status.HTTP_201_CREATED)
 
 
 @api_view(["GET"])
@@ -773,6 +777,11 @@ def stripe_create_charge(request):
             },
         ],
         mode="payment",
+        metadata={
+            "contributor_email": contributor_email,
+            "project_contract_address": project_contract_address,
+            "project_id": project_id,
+        },
     )
     return Response(
         {"message": "success", "hosted_url": checkout["url"]}, status=status.HTTP_200_OK
@@ -793,19 +802,27 @@ def stripe_webhook(request):
         # Invalid payload
         return HttpResponse(status=400)
     except stripe.error.SignatureVerificationError as e:
-
         # Invalid signature
         return HttpResponse(status=400)
     # check payment success
     if event.type == "payment_intent.succeeded":
         payment_intent = event.data.object  # contains a stripe.PaymentIntent
-        pprint(payment_intent)
-        Response({"message": "success"}, status=status.HTTP_200_OK)
-        print("PaymentIntent was successful!")
-    # Add contribution to "Contribution" table
-    # Add amount to project rased_amount
-    # Check if project reached target amount
-    pprint(request.data)
+        payment_intent_id = payment_intent["id"]
+        # Get checkout session related to this id
+        c_s = stripe.checkout.Session.list(payment_intent=payment_intent_id)
+        # Add contribution to "Contribution" table
+        project_id = c_s["data"][0]["metadata"]["project_id"]
+        contributor_email = c_s["data"][0]["metadata"]["contributor_email"]
+        contribution_amount = float(payment_intent["amount_received"] / 100)
+        add_contribution_to_contribution_table(
+            "0", contributor_email, project_id, contribution_amount, "stripe", "0"
+        )
+        # # Add amount to project rased_amount
+        # add_amount_to_project_raised_amount(project_id, contribution_amount)
+        # # Check if project reached target amount
+        # check_project_reached_target(project_id)
+        return Response({"message": "success"}, status=status.HTTP_200_OK)
+    return HttpResponse(status=200)
 
 
 @api_view(["POST"])
