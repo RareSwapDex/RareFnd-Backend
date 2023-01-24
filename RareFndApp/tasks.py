@@ -147,7 +147,7 @@ def check_pending_contributions():
                 )
                 contribution.save()
                 if tx_amount >= selected_incentive.price:
-                    Incentive.objects.filter(id=int(selected_incentive)).update(
+                    Incentive.objects.filter(id=int(selected_incentive.id)).update(
                         available_items=selected_incentive.available_items - 1
                     )
 
