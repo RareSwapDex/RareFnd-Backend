@@ -141,14 +141,20 @@ def check_pending_contributions():
                     project=tx_project,
                     amount=tx_amount,
                     hash=tx["hash"],
-                    selected_incentive=selected_incentive,
+                    selected_incentive=selected_incentive
+                    if selected_incentive.available_items > 0
+                    else None,
                     eligible_for_selected_incentive=tx_amount
                     >= selected_incentive.price
-                    if selected_incentive
+                    if selected_incentive and selected_incentive.available_items > 0
                     else False,
                 )
                 contribution.save()
-                if selected_incentive != None and tx_amount >= selected_incentive.price:
+                if (
+                    selected_incentive != None
+                    and tx_amount >= selected_incentive.price
+                    and selected_incentive.available_items > 0
+                ):
                     Incentive.objects.filter(id=int(selected_incentive.id)).update(
                         available_items=selected_incentive.available_items - 1
                     )

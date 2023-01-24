@@ -389,7 +389,6 @@ def projects_from_category(request, category_name):
             return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method == "GET":
         serializer = ProjectSerializer(projects, many=True)
-        pprint(serializer.data)
         return Response({"projects": serializer.data})
 
 
@@ -690,7 +689,7 @@ def coinbase_create_charge(request):
     contribution_amount = request.data.get("contributionAmount")
     project_id = request.data.get("projectId")
     project_url = request.data.get("projectURL")
-    selected_incentive = request.data.get("selected_incentive")
+    selected_incentive = request.data.get("selectedIncentive")
     contribution = {
         "name": project_name,
         "local_price": {"amount": contribution_amount, "currency": "USD"},
@@ -724,7 +723,11 @@ def coinbase_webhook(request):
 
     if event["type"] == "charge:confirmed":
         project_id = int(event["data"]["metadata"]["project_id"])
-        selected_incentive = int(event["data"]["metadata"]["selected_incentive"])
+        selected_incentive = (
+            int(event["data"]["metadata"]["selected_incentive"])
+            if event["data"]["metadata"]["selected_incentive"]
+            else False
+        )
         contributor_email = event["data"]["metadata"]["contributor_email"]
         contribution_amount = float(
             event["data"]["payments"][0]["net"]["local"]["amount"]
