@@ -688,6 +688,7 @@ def coinbase_create_charge(request):
     contribution_amount = request.data.get("contributionAmount")
     project_id = request.data.get("projectId")
     project_url = request.data.get("projectURL")
+    selected_incentive = request.data.get("selected_incentive")
     contribution = {
         "name": project_name,
         "local_price": {"amount": contribution_amount, "currency": "USD"},
@@ -698,6 +699,7 @@ def coinbase_create_charge(request):
             "contributor_email": contributor_email,
             "project_contract_address": project_contract_address,
             "project_id": project_id,
+            "selected_incentive": selected_incentive,
         },
     }
     charge = client.charge.create(**contribution)
@@ -720,6 +722,7 @@ def coinbase_webhook(request):
 
     if event["type"] == "charge:confirmed":
         project_id = int(event["data"]["metadata"]["project_id"])
+        selected_incentive = int(event["data"]["metadata"]["selected_incentive"])
         contributor_email = event["data"]["metadata"]["contributor_email"]
         contribution_amount = float(
             event["data"]["payments"][0]["net"]["local"]["amount"]
@@ -733,6 +736,7 @@ def coinbase_webhook(request):
             contribution_amount,
             "coinbase",
             contribution_hash,
+            selected_incentive,
         )
         # # Add amount to project rased_amount
         # add_amount_to_project_raised_amount(project_id, contribution_amount)
@@ -749,6 +753,7 @@ def stripe_create_charge(request):
     contribution_amount = request.data.get("contributionAmount")
     project_id = request.data.get("projectId")
     project_url = request.data.get("projectURL")
+    selected_incentive = request.data.get("selectedIncentive")
     # Create a product
     product = stripe.Product.create(
         name=project_name,
@@ -761,6 +766,7 @@ def stripe_create_charge(request):
             "contributor_email": contributor_email,
             "project_contract_address": project_contract_address,
             "project_id": project_id,
+            "selected_incentive": selected_incentive,
         },
     )
     pprint(product)
@@ -781,6 +787,7 @@ def stripe_create_charge(request):
             "contributor_email": contributor_email,
             "project_contract_address": project_contract_address,
             "project_id": project_id,
+            "selected_incentive": selected_incentive,
         },
     )
     return Response(
@@ -814,8 +821,15 @@ def stripe_webhook(request):
         project_id = c_s["data"][0]["metadata"]["project_id"]
         contributor_email = c_s["data"][0]["metadata"]["contributor_email"]
         contribution_amount = float(payment_intent["amount_received"] / 100)
+        selected_incentive = c_s["data"][0]["metadata"]["selected_incentive"]
         add_contribution_to_contribution_table(
-            "0", contributor_email, project_id, contribution_amount, "stripe", "0"
+            "0",
+            contributor_email,
+            project_id,
+            contribution_amount,
+            "stripe",
+            "0",
+            selected_incentive,
         )
         # # Add amount to project rased_amount
         # add_amount_to_project_raised_amount(project_id, contribution_amount)

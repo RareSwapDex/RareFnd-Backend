@@ -40,6 +40,7 @@ def add_contribution_to_contribution_table(
     contribution_amount,
     contribution_method,
     contribution_hash,
+    selected_incentive,
 ):
     project = Project.objects.get(pk=project_id)
     c = Contribution(
@@ -49,6 +50,9 @@ def add_contribution_to_contribution_table(
         amount=contribution_amount,
         contribution_method=contribution_method,
         hash=contribution_hash,
+        selected_incentive=Incentive.objects.get(pk=int(selected_incentive)),
+        eligible_for_selected_incentive=contribution_amount
+        >= Incentive.objects.get(pk=int(selected_incentive)),
     )
     c.clean()
     c.save()
