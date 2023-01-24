@@ -135,6 +135,7 @@ def check_pending_contributions():
                 and (tx_project_staking_address.lower() == tx_recipient.lower())
                 and datetime.fromtimestamp(tx_timestamp) > tx_project_live_datetime
             ):
+                print("llllllll")
                 # Add to contributions table
                 contribution = Contribution(
                     contributor_wallet_address=receipt["from"].lower(),
@@ -142,13 +143,14 @@ def check_pending_contributions():
                     amount=tx_amount,
                     hash=tx["hash"],
                     selected_incentive=selected_incentive
-                    if selected_incentive.available_items > 0
+                    if selected_incentive and selected_incentive.available_items > 0
                     else None,
                     eligible_for_selected_incentive=tx_amount
                     >= selected_incentive.price
                     if selected_incentive and selected_incentive.available_items > 0
                     else False,
                 )
+                contribution.clean()
                 contribution.save()
                 if (
                     selected_incentive != None
