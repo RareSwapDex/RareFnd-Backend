@@ -43,6 +43,7 @@ def add_contribution_to_contribution_table(
     selected_incentive,
 ):
     project = Project.objects.get(pk=project_id)
+    incentive_obj = Incentive.objects.get(pk=int(selected_incentive))
     c = Contribution(
         contributor_wallet_address=contributor_wallet_address,
         contributor_email=contributor_email,
@@ -51,8 +52,11 @@ def add_contribution_to_contribution_table(
         contribution_method=contribution_method,
         hash=contribution_hash,
         selected_incentive=Incentive.objects.get(pk=int(selected_incentive)),
-        eligible_for_selected_incentive=contribution_amount
-        >= Incentive.objects.get(pk=int(selected_incentive)).price,
+        eligible_for_selected_incentive=contribution_amount >= incentive_obj.price,
     )
+    if contribution_amount >= incentive_obj.price:
+        Incentive.objects.filter(id=int(selected_incentive)).update(
+            available_items=incentive_obj.available_items - 1
+        )
     c.clean()
     c.save()

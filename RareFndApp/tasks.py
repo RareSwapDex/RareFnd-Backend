@@ -136,7 +136,6 @@ def check_pending_contributions():
                 and datetime.fromtimestamp(tx_timestamp) > tx_project_live_datetime
             ):
                 # Add to contributions table
-                print("hoho", tx)
                 contribution = Contribution(
                     contributor_wallet_address=receipt["from"].lower(),
                     project=tx_project,
@@ -147,6 +146,11 @@ def check_pending_contributions():
                     >= selected_incentive.price,
                 )
                 contribution.save()
+                if tx_amount >= selected_incentive.price:
+                    Incentive.objects.filter(id=int(selected_incentive)).update(
+                        available_items=selected_incentive.available_items - 1
+                    )
+
                 # Add amount to project raised_amount
                 project_raised_amount = getattr(tx_project, "raised_amount")
                 Project.objects.filter(pk=tx["project"]).update(
