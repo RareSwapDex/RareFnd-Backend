@@ -76,7 +76,8 @@ def add_contribution_to_contribution_table(
         and Incentive.objects.get(pk=int(selected_incentive)).price > 0
     ):
         Incentive.objects.filter(id=int(selected_incentive)).update(
-            available_items=incentive_obj.available_items - 1
+            available_items=incentive_obj.available_items - 1,
+            reserved=incentive_obj.reserved + 1,
         )
     c.clean()
     c.save()

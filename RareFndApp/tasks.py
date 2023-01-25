@@ -163,7 +163,8 @@ def check_pending_contributions():
                     and selected_incentive.available_items > 0
                 ):
                     Incentive.objects.filter(id=int(selected_incentive.id)).update(
-                        available_items=selected_incentive.available_items - 1
+                        available_items=selected_incentive.available_items - 1,
+                        reserved=selected_incentive.reserved + 1,
                     )
 
                 # Add amount to project raised_amount
