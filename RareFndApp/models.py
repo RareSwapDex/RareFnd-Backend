@@ -378,6 +378,8 @@ class PendingContribution(models.Model):
     selected_incentive = models.ForeignKey(
         Incentive, null=True, blank=True, on_delete=models.CASCADE
     )
+    contribution_amount = models.FloatField(null=True, blank=True)
+    contributor_email = models.CharField(max_length=254, null=True, blank=True)
 
     def __str__(self):
         return f"{self.hash} {self.project}"
@@ -408,6 +410,9 @@ class MercuryoPendingStake(models.Model):
     wallet_address = models.CharField(
         max_length=254, null=True, blank=True, default="None"
     )
+    contributor_email = models.CharField(
+        max_length=254, null=True, blank=True, default="None"
+    )
     smart_contract_address = models.CharField(
         max_length=254, null=True, blank=True, default="None"
     )
@@ -419,6 +424,9 @@ class MercuryoPendingStake(models.Model):
     )
     contribution_datetime = models.DateTimeField(
         auto_now_add=True, blank=False, null=False
+    )
+    selected_incentive = models.ForeignKey(
+        Incentive, null=True, blank=True, on_delete=models.CASCADE
     )
 
     def __str__(self):

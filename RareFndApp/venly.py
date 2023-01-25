@@ -287,6 +287,7 @@ def execute_stake(wallet_address, usd_to_stake, bnb_to_stake):
                 return {
                     "hash": tx_hash,
                     "project": pending_tx.project_id,
+                    "selected_incentive": pending_tx.selected_incentive,
                 }
             else:
                 time.sleep(2)

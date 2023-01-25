@@ -78,9 +78,8 @@ def check_pending_contributions():
     pending_contributions = serializer.data
     for p in pending_contributions:
         tx = dict(OrderedDict(p))
-        selected_incentive = PendingContribution.objects.get(
-            pk=tx["id"]
-        ).selected_incentive
+        tx_model = PendingContribution.objects.get(pk=tx["id"])
+        selected_incentive = tx_model.selected_incentive
 
         # Test if Tx hash already in Contribution table
         if Contribution.objects.filter(hash__iexact=tx["hash"]):
@@ -141,10 +140,16 @@ def check_pending_contributions():
                     project=tx_project,
                     amount=tx_amount,
                     hash=tx["hash"],
+                    contributor_email=tx_model.contributor_email or None,
+                    contribution_method="Mercuryo"
+                    if tx_model.contribution_amount
+                    else "FND",  # We assign contribution_amount to Pending Contributions only if the payment is through Mercuryo
                     selected_incentive=selected_incentive
                     if selected_incentive and selected_incentive.available_items > 0
                     else None,
-                    eligible_for_selected_incentive=tx_amount
+                    eligible_for_selected_incentive=(
+                        tx_model.contribution_amount or tx_amount
+                    )
                     >= selected_incentive.price
                     if selected_incentive and selected_incentive.available_items > 0
                     else False,
@@ -153,7 +158,8 @@ def check_pending_contributions():
                 contribution.save()
                 if (
                     selected_incentive != None
-                    and tx_amount >= selected_incentive.price
+                    and (tx_model.contribution_amount or tx_amount)
+                    >= selected_incentive.price
                     and selected_incentive.available_items > 0
                 ):
                     Incentive.objects.filter(id=int(selected_incentive.id)).update(

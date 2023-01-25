@@ -1,3 +1,4 @@
+from datetime import timedelta
 from http.client import BAD_REQUEST
 from pprint import pprint
 from django.http import HttpResponse, JsonResponse
@@ -58,6 +59,8 @@ from decouple import config
 import stripe
 from .models_helper_functions import *
 from .shopify_helper_functions import *
+from django.utils import timezone
+import time
 
 
 S3_BUCKET_KEY = settings.AWS_SECRET_ACCESS_KEY
@@ -573,14 +576,20 @@ def venly_execute_swap(request):
 
 
 @api_view(["GET"])
-def venly_create_wallet(request, email, usd_amount, smart_contract_address, project_id):
+def venly_create_wallet(
+    request, email, usd_amount, smart_contract_address, project_id, selected_incentive
+):
     wallet = venly.get_or_create_wallet(email)
     if wallet.get("address"):
         pending_stake = MercuryoPendingStake(
             wallet_address=wallet.get("address"),
+            contributor_email=email,
             smart_contract_address=smart_contract_address,
             usd_amount=usd_amount,
             project_id=project_id,
+            selected_incentive=Incentive.objects.get(pk=selected_incentive)
+            if selected_incentive != 0
+            else None,
         )
         pending_stake.clean()
         pending_stake.save()
@@ -605,19 +614,43 @@ def mercuryo_callback_wallet_received_bnb(request):
         MercuryoPendingStake.objects.filter(
             wallet_address=wallet_address, usd_amount=usd_amount_to_stake
         ).update(bnb_amount=bnb_to_stake)
-        response = venly.execute_stake(
-            wallet_address, usd_amount_to_stake, bnb_to_stake
+        target_pending_tx = MercuryoPendingStake.objects.filter(
+            wallet_address=wallet_address, usd_amount=usd_amount_to_stake
+        )[0]
+        ##############
+        current_time = timezone.now()
+        time_threshold = current_time - timedelta(hours=4)
+        pending_tx = MercuryoPendingStake.objects.filter(
+            wallet_address__iexact=wallet_address,
+            contribution_datetime__gte=time_threshold,
+        )[0]
+        response = {
+            "hash": "fsjfafiaudhkuyfgshidhfisahdfishua",
+            "project": pending_tx.project_id,
+            "selected_incentive": pending_tx.selected_incentive,
+        }
+        ##############
+        # response = venly.execute_stake(
+        #     wallet_address, usd_amount_to_stake, bnb_to_stake
+        # )
+        # if response is None:
+        #     return Response(
+        #         {
+        #             "NOT STAKED": "Could NOT stake: 'venly.execute_stake' function returned None, this means that there is no pending contribution found with less than 4 hours 'threshold', otherwise something wrong wend with the staking operation"
+        #         },
+        #         status=status.HTTP_404_NOT_FOUND,
+        #     )
+        p_c = PendingContribution(
+            hash=response["hash"],
+            project=Project.objects.get(pk=response["project"]),
+            selected_incentive=response["selected_incentive"],
+            contribution_amount=target_pending_tx.usd_amount,
+            contributor_email=target_pending_tx.contributor_email,
         )
-        if response is None:
-            return Response(
-                {
-                    "NOT STAKED": "Could NOT stake: 'venly.execute_stake' function returned None, this means that there is no pending contribution found with less than 4 hours 'threshold', otherwise something wrong wend with the staking operation"
-                },
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        serializer = PendingContributionSerializer(data=response)
-        if serializer.is_valid():
-            serializer.save()
+        p_c.save()
+        # serializer = PendingContributionSerializer(data=response)
+        # if serializer.is_valid():
+        #     serializer.save()
         MercuryoPendingStake.objects.filter(
             staking_transaction_hash=response["hash"]
         ).delete()
@@ -738,6 +771,7 @@ def coinbase_webhook(request):
 
     if event["type"] == "charge:confirmed":
         project_id = int(event["data"]["metadata"]["project_id"])
+        pprint(event["data"])
         selected_incentive = (
             int(event["data"]["metadata"]["selected_incentive"])
             if event["data"]["metadata"]["selected_incentive"] != "false"
