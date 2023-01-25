@@ -617,29 +617,29 @@ def mercuryo_callback_wallet_received_bnb(request):
         target_pending_tx = MercuryoPendingStake.objects.filter(
             wallet_address=wallet_address, usd_amount=usd_amount_to_stake
         )[0]
-        ##############
-        current_time = timezone.now()
-        time_threshold = current_time - timedelta(hours=4)
-        pending_tx = MercuryoPendingStake.objects.filter(
-            wallet_address__iexact=wallet_address,
-            contribution_datetime__gte=time_threshold,
-        )[0]
-        response = {
-            "hash": "fsjfafiaudhkuyfgshidhfisahdfishua",
-            "project": pending_tx.project_id,
-            "selected_incentive": pending_tx.selected_incentive,
-        }
-        ##############
-        # response = venly.execute_stake(
-        #     wallet_address, usd_amount_to_stake, bnb_to_stake
-        # )
-        # if response is None:
-        #     return Response(
-        #         {
-        #             "NOT STAKED": "Could NOT stake: 'venly.execute_stake' function returned None, this means that there is no pending contribution found with less than 4 hours 'threshold', otherwise something wrong wend with the staking operation"
-        #         },
-        #         status=status.HTTP_404_NOT_FOUND,
-        #     )
+        # ##############
+        # current_time = timezone.now()
+        # time_threshold = current_time - timedelta(hours=4)
+        # pending_tx = MercuryoPendingStake.objects.filter(
+        #     wallet_address__iexact=wallet_address,
+        #     contribution_datetime__gte=time_threshold,
+        # )[0]
+        # response = {
+        #     "hash": "fsjfafiaudhkuyfgshidhfisahdfishua",
+        #     "project": pending_tx.project_id,
+        #     "selected_incentive": pending_tx.selected_incentive,
+        # }
+        # ##############
+        response = venly.execute_stake(
+            wallet_address, usd_amount_to_stake, bnb_to_stake
+        )
+        if response is None:
+            return Response(
+                {
+                    "NOT STAKED": "Could NOT stake: 'venly.execute_stake' function returned None, this means that there is no pending contribution found with less than 4 hours 'threshold', otherwise something wrong wend with the staking operation"
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
         p_c = PendingContribution(
             hash=response["hash"],
             project=Project.objects.get(pk=response["project"]),
