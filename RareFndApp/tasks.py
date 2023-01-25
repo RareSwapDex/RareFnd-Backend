@@ -135,7 +135,6 @@ def check_pending_contributions():
                 and (tx_project_staking_address.lower() == tx_recipient.lower())
                 and datetime.fromtimestamp(tx_timestamp) > tx_project_live_datetime
             ):
-                print("llllllll")
                 # Add to contributions table
                 contribution = Contribution(
                     contributor_wallet_address=receipt["from"].lower(),

@@ -232,7 +232,7 @@ def execute_stake(wallet_address, usd_to_stake, bnb_to_stake):
     time_threshold = current_time - timedelta(hours=4)
     pending_tx = MercuryoPendingStake.objects.filter(
         wallet_address__iexact=wallet_address, contribution_datetime__gte=time_threshold
-    )[0]
+    )
     if not pending_tx:
         return
     pending_tx = pending_tx[0]

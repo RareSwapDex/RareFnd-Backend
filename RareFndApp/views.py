@@ -162,6 +162,21 @@ def projects_details_by_title(request, title):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(["GET"])
+def projects_details_by_owner_username(request, username):
+    try:
+        owner = User.objects.filter(username=username)
+        if len(owner) <= 0:
+            raise (Project.DoesNotExist)
+        projects = Project.objects.filter(owner=owner[0])
+        if len(projects) <= 0:
+            raise (Project.DoesNotExist)
+        serializer = ProjectSerializer(projects, many=True)
+        return Response({"projects": serializer.data})
+    except Project.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+
 @api_view(["POST"])
 @login_required
 def add_project(request):
