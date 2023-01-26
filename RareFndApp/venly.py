@@ -217,21 +217,19 @@ def stake(wallet, pin_code, sc_address, amount_to_stake):
             "chainSpecificFields": {"gasLimit": "300000"},
         },
     }
-    response = requests.post(
-        f"https://api-wallet.venly.io/api/transactions/execute",
+    return requests.post(
+        "https://api-wallet.venly.io/api/transactions/execute",
         json=data,
         headers=AUTH_HEADERS,
     ).json()
-    return response
 
 
 def get_transaction_status(tx_status):
     get_auth_token()
-    response = requests.get(
+    return requests.get(
         f"https://api-wallet.venly.io/api/transactions/BSC/{tx_status}/status",
         headers=AUTH_HEADERS,
     ).json()
-    return response
 
 
 def execute_stake(wallet_address, bnb_to_stake, project_id):

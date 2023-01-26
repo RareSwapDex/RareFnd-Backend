@@ -598,7 +598,7 @@ def create_mercuryo_checkout_url(
     redirect_url = data["redirectURL"].replace(
         "http://localhost:3000/", "https://bb41-2-50-43-16.ngrok.io/"
     )
-    redirect_url += "?payment_status=success"
+    # redirect_url += "?payment_status=success"
     payload = {
         "type": "buy",
         "from": "USD",
