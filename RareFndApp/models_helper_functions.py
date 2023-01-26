@@ -12,7 +12,6 @@ from .models import (
     ProjectFile,
     Type,
     EligibleCountry,
-    MercuryoPendingStake,
 )
 import random
 import string

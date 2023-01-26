@@ -5,7 +5,7 @@ import urllib
 from pprint import pprint
 import os
 import json
-from .models import MercuryoPendingStake
+from .models import Project
 import time
 from web3 import Web3
 from django.utils import timezone
@@ -182,12 +182,11 @@ def approve_smart_contract(wallet, pin_code, sc_address):
             "chainSpecificFields": {"gasLimit": "300000"},
         },
     }
-    response = requests.post(
-        f"https://api-wallet.venly.io/api/transactions/execute",
+    return requests.post(
+        "https://api-wallet.venly.io/api/transactions/execute",
         json=data,
         headers=AUTH_HEADERS,
     ).json()
-    return response
 
 
 def stake(wallet, pin_code, sc_address, amount_to_stake):
@@ -224,34 +223,26 @@ def get_transaction_status(tx_status):
     return response
 
 
-def execute_stake(wallet_address, usd_to_stake, bnb_to_stake):
+def execute_stake(wallet_address, bnb_to_stake, project_id):
+    # return {
+    #     "hash": "0x704583309c5364702bb215c81d1a859e5a918ca2a0a9c0b2beac56f8747c8faf",
+    # }
     get_auth_token()
     pin_code = PIN_CODE
-    # Only contributions which happened in the last 4 hours
-    current_time = timezone.now()
-    time_threshold = current_time - timedelta(hours=4)
-    pending_tx = MercuryoPendingStake.objects.filter(
-        wallet_address__iexact=wallet_address, contribution_datetime__gte=time_threshold
-    )
-    if not pending_tx:
-        return
-    pending_tx = pending_tx[0]
-    sc_address = pending_tx.smart_contract_address
+    sc_address = Project.objects.get(pk=project_id).staking_address
     wallet = get_wallet_by_address(wallet_address)
     bnb_to_stake = str(float(bnb_to_stake) - 0.003)
-    # a
     swap_rates = get_swap_rates(bnb_to_stake)
     fnd_to_receive = swap_rates["result"]["bestRate"]["outputAmount"]
     swap_builder_response = swap_builder(wallet, pin_code, bnb_to_stake, fnd_to_receive)
     tx_hash = execute_swap_transaction(
         wallet, pin_code, swap_builder_response, bnb_to_stake
     )
-    if not tx_hash["success"]:
-        if tx_hash["errors"][0]["code"] == "pincode.incorrect":
-            pin_code = "9294"
-            tx_hash = execute_swap_transaction(
-                wallet, pin_code, swap_builder_response, bnb_to_stake
-            )
+    if not tx_hash["success"] and tx_hash["errors"][0]["code"] == "pincode.incorrect":
+        pin_code = "9294"
+        tx_hash = execute_swap_transaction(
+            wallet, pin_code, swap_builder_response, bnb_to_stake
+        )
     tx_hash = tx_hash["result"]["transactionHash"]
     while True:
         get_auth_token()
@@ -271,23 +262,16 @@ def execute_stake(wallet_address, usd_to_stake, bnb_to_stake):
                 break
         else:
             time.sleep(2)
-    # a
-    print(get_BNB_balance(wallet))
     wallet_fnd_balance = get_fnd_balance(wallet) - 1
     tx_hash = stake(wallet, pin_code, sc_address, wallet_fnd_balance)
-    pprint(tx_hash)
     tx_hash = tx_hash["result"]["transactionHash"]
     while True:
         get_auth_token()
         tx = get_transaction_status(tx_hash)
         if tx["success"] == True:
             if tx["result"]["status"] == "SUCCEEDED":
-                pending_tx.staking_transaction_hash = tx_hash
-                pending_tx.save()
                 return {
                     "hash": tx_hash,
-                    "project": pending_tx.project_id,
-                    "selected_incentive": pending_tx.selected_incentive,
                 }
             else:
                 time.sleep(2)

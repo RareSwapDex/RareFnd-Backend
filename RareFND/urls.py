@@ -87,10 +87,10 @@ urlpatterns = [
     path("api/auth/token/", MyTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path(
-        "api/venly/create_wallet/<str:email>/<float:usd_amount>/<str:smart_contract_address>/<int:project_id>/<int:selected_incentive>/",
-        views.venly_create_wallet,
+        "api/mercuryo/checkout_url/",
+        views.create_mercuryo_checkout_url,
     ),
-    path("api/mercuryo/payment_callback/", views.mercuryo_callback_wallet_received_bnb),
+    path("api/mercuryo/payment_callback/", views.mercuryo_callback),
     path("api/auth/venly_auth/", views.get_venly_auth),
     path("api/venly_execute_swap/", views.venly_execute_swap),
     path("api/coinbase/webhook/", views.coinbase_webhook),

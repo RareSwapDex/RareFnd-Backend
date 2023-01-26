@@ -32,7 +32,6 @@ from .models import (
     ProjectFile,
     Type,
     EligibleCountry,
-    MercuryoPendingStake,
 )
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -59,8 +58,7 @@ from decouple import config
 import stripe
 from .models_helper_functions import *
 from .shopify_helper_functions import *
-from django.utils import timezone
-import time
+from hashlib import sha512
 
 
 S3_BUCKET_KEY = settings.AWS_SECRET_ACCESS_KEY
@@ -72,7 +70,10 @@ COINBASE_WEBHOOK_SECRET = config("COINBASE_WEBHOOK_SECRET")
 COINBASE_API_KEY = config("COINBASE_API_KEY")
 STRIPE_API_KEY = config("STRIPE_API_KEY")
 STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET")
+MERCURYO_SECRET_KEY = config("MERCURYO_SECRET_KEY")
+MERCURYO_CALLBACK_SIGN_KEY = config("MERCURYO_CALLBACK_SIGN_KEY")
 stripe.api_key = STRIPE_API_KEY
+MERCURYO_WIDGET_ID = config("MERCURYO_WIDGET_ID")
 
 
 s3_session = boto3.Session(
@@ -575,92 +576,91 @@ def venly_execute_swap(request):
     return Response(response, status=status.HTTP_200_OK)
 
 
-@api_view(["GET"])
-def venly_create_wallet(
-    request, email, usd_amount, smart_contract_address, project_id, selected_incentive
+@api_view(["POST"])
+def create_mercuryo_checkout_url(
+    request,
 ):
-    wallet = venly.get_or_create_wallet(email)
-    if wallet.get("address"):
-        pending_stake = MercuryoPendingStake(
-            wallet_address=wallet.get("address"),
-            contributor_email=email,
-            smart_contract_address=smart_contract_address,
-            usd_amount=usd_amount,
-            project_id=project_id,
-            selected_incentive=Incentive.objects.get(pk=selected_incentive)
-            if selected_incentive != 0
-            else None,
+    data = request.data
+    pprint(request)
+    pprint(data)
+    wallet = venly.get_or_create_wallet(data["contributionEmail"])
+    signature = sha512(
+        f"{wallet.get('add_ress')}{MERCURYO_SECRET_KEY}".encode("utf-8")
+    ).hexdigest()
+    merchant_transaction_id = (
+        f"{data['contributionAmount']}-{data['projectId']}-{data['selectedIncentive']}-"
+        + "".join(
+            random.choices(
+                string.ascii_uppercase + string.digits + string.ascii_lowercase, k=15
+            )
         )
-        pending_stake.clean()
-        pending_stake.save()
-        response = {"address": wallet.get("address")}
-        return Response(response, status=status.HTTP_200_OK)
+    )
+    redirect_url = data["redirectURL"].replace(
+        "http://localhost:3000/", "https://bb41-2-50-43-16.ngrok.io/"
+    )
+    redirect_url += "?payment_status=success"
+    payload = {
+        "type": "buy",
+        "from": "USD",
+        "to": "BNB",
+        "amount": data["contributionAmount"],
+        "widget_id": MERCURYO_WIDGET_ID,
+        "address": wallet.get("address"),
+        "signature": signature,
+        "email": data["contributionEmail"],
+        "redirect_url": redirect_url,
+        "merchant_transaction_id": merchant_transaction_id,
+    }
+    checkout_url = f"https://exchange.mercuryo.io/?widget_id={payload['widget_id']}&address={payload['address']}&signature={payload['signature']}&fiat_amount={payload['amount']}&type={payload['type']}&fiat_currency={payload['from']}&currency={payload['to']}&email={payload['email']}&redirect_url={payload['redirect_url']}&merchant_transaction_id={payload['merchant_transaction_id']}"
+    return Response({"checkout_url": checkout_url}, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])
-def mercuryo_callback_wallet_received_bnb(request):
-    # wallet = venly.get_or_create_wallet()
-    # response = {"address": wallet.get("address"), "email": wallet.get("identifier")}
+def mercuryo_callback(request):
     pprint(request.data)
+    # return
     if request.data.get("payload"):
         data = request.data["payload"]["data"]
     else:
         data = request.data["data"]
 
     if data["status"] == "completed":
-        usd_amount_to_stake = data["fiat_amount"]
+        merchant_transaction_id = data[
+            "merchant_transaction_id"
+        ]  # 25-46-33-xLjQwit1fvEzkpo
+        usd_amount_to_stake = float(merchant_transaction_id.split("-")[0])
+        project_id = int(merchant_transaction_id.split("-")[1])
+        selected_incentive = (
+            Incentive.objects.get(pk=int(merchant_transaction_id.split("-")[2]))
+            if int(merchant_transaction_id.split("-")[2]) != 0
+            else None
+        )
         bnb_to_stake = data["amount"]
         wallet_address = data["tx"]["address"]
-        MercuryoPendingStake.objects.filter(wallet_address=wallet_address).update(
-            bnb_amount=bnb_to_stake
-        )
-        target_pending_tx = MercuryoPendingStake.objects.filter(
-            wallet_address=wallet_address
-        )[0]
-        # ##############
-        # current_time = timezone.now()
-        # time_threshold = current_time - timedelta(hours=4)
-        # pending_tx = MercuryoPendingStake.objects.filter(
-        #     wallet_address__iexact=wallet_address,
-        #     contribution_datetime__gte=time_threshold,
-        # )[0]
-        # response = {
-        #     "hash": "fsjfafiaudhkuyfgshidhfisahdfishua",
-        #     "project": pending_tx.project_id,
-        #     "selected_incentive": pending_tx.selected_incentive,
-        # }
-        # ##############
-        response = venly.execute_stake(
-            wallet_address, usd_amount_to_stake, bnb_to_stake
-        )
+        contributor_email = data["user"]["email"]
+        response = venly.execute_stake(wallet_address, bnb_to_stake, project_id)
         if response is None:
             return Response(
                 {
-                    "NOT STAKED": "Could NOT stake: 'venly.execute_stake' function returned None, this means that there is no pending contribution found with less than 4 hours 'threshold', otherwise something wrong wend with the staking operation"
+                    "NOT STAKED": "Could NOT stake: 'venly.execute_stake' function returned None"
                 },
                 status=status.HTTP_404_NOT_FOUND,
             )
         p_c = PendingContribution(
             hash=response["hash"],
-            project=Project.objects.get(pk=response["project"]),
-            selected_incentive=response["selected_incentive"],
-            contribution_amount=target_pending_tx.usd_amount,
-            contributor_email=target_pending_tx.contributor_email,
+            project=Project.objects.get(pk=project_id),
+            selected_incentive=selected_incentive,
+            contribution_amount=usd_amount_to_stake,
+            contributor_email=contributor_email,
         )
         p_c.save()
-        # serializer = PendingContributionSerializer(data=response)
-        # if serializer.is_valid():
-        #     serializer.save()
-        MercuryoPendingStake.objects.filter(
-            staking_transaction_hash=response["hash"]
-        ).delete()
-    # return Response(response, status=status.HTTP_200_OK)
-    return Response(
-        {
-            "OK": f"Address {wallet_address} staked {bnb_to_stake}BNB to project id {response['project']}, tx hash: {response['hash']}"
-        },
-        status=status.HTTP_200_OK,
-    )
+        return Response(
+            {
+                "OK": f"Address {wallet_address} staked {bnb_to_stake}BNB to project id {project_id}, tx hash: {response['hash']}"
+            },
+            status=status.HTTP_200_OK,
+        )
+    return Response({"status": data["status"]}, status=status.HTTP_200_OK)
 
 
 def backend_send_email(subject, message, email_from, recipient_list):

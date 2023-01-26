@@ -404,30 +404,3 @@ class TokenPrice(models.Model):
 
     def __str__(self):
         return f"{self.price} {self.price_datetime}"
-
-
-class MercuryoPendingStake(models.Model):
-    wallet_address = models.CharField(
-        max_length=254, null=True, blank=True, default="None"
-    )
-    contributor_email = models.CharField(
-        max_length=254, null=True, blank=True, default="None"
-    )
-    smart_contract_address = models.CharField(
-        max_length=254, null=True, blank=True, default="None"
-    )
-    usd_amount = models.FloatField(default=0)
-    bnb_amount = models.FloatField(default=0)
-    project_id = models.IntegerField(default=0)
-    staking_transaction_hash = models.CharField(
-        max_length=254, null=True, blank=True, default="None"
-    )
-    contribution_datetime = models.DateTimeField(
-        auto_now_add=True, blank=False, null=False
-    )
-    selected_incentive = models.ForeignKey(
-        Incentive, null=True, blank=True, on_delete=models.CASCADE
-    )
-
-    def __str__(self):
-        return f"{self.wallet_address} {self.smart_contract_address} {self.usd_amount} | {self.contribution_datetime}"
