@@ -46,6 +46,7 @@ def get_auth_token():
 
 
 def get_wallet_by_identifier(identifier):
+    get_auth_token()
     response = requests.get(
         f"https://api-wallet.venly.io/api/wallets?identifier={identifier}",
         headers=AUTH_HEADERS,
@@ -54,14 +55,17 @@ def get_wallet_by_identifier(identifier):
 
 
 def get_wallet_by_address(address):
+    get_auth_token()
     response = requests.get(
         f"https://api-wallet.venly.io/api/wallets?address={address}",
         headers=AUTH_HEADERS,
     ).json()
+    # print(get_or_create_wallet(""))
     return response["result"][0] if response["success"] else "Failed"
 
 
 def get_all_wallets():
+    get_auth_token()
     response = requests.get(
         "https://api-wallet.venly.io/api/wallets", headers=AUTH_HEADERS
     ).json()
@@ -69,6 +73,7 @@ def get_all_wallets():
 
 
 def create_wallet(identifier):
+    get_auth_token()
     data = {
         "walletType": "WHITE_LABEL",
         "secretType": "BSC",
@@ -96,6 +101,7 @@ def get_BNB_balance(wallet):
 
 
 def get_fnd_balance(wallet):
+    get_auth_token()
     wallet_id = wallet["id"]
     response = requests.get(
         f"https://api-wallet.venly.io/api/wallets/{wallet_id}/balance/tokens/{FND}",
@@ -108,6 +114,7 @@ def get_fnd_balance(wallet):
 
 
 def get_swap_rates(bnb_to_swap):
+    get_auth_token()
     response = requests.get(
         f"https://api-wallet.venly.io/api/swaps/rates?fromSecretType=BSC&toSecretType=BSC&fromToken=0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee&toToken={FND}&amount={bnb_to_swap}&orderType=SELL",
         headers=AUTH_HEADERS,
@@ -116,6 +123,7 @@ def get_swap_rates(bnb_to_swap):
 
 
 def swap_builder(wallet, pin_code, bnb_to_swap, fnd_to_receive):
+    get_auth_token()
     wallet_id = wallet["id"]
     data = {
         # "enableGasEstimate": True,
@@ -141,6 +149,7 @@ def swap_builder(wallet, pin_code, bnb_to_swap, fnd_to_receive):
 
 
 def execute_swap_transaction(wallet, pin_code, swap_builder, bnb_value_to_swap):
+    get_auth_token()
     wallet_id = wallet["id"]
     data = {
         "walletId": wallet_id,
@@ -161,6 +170,7 @@ def execute_swap_transaction(wallet, pin_code, swap_builder, bnb_value_to_swap):
 
 
 def approve_smart_contract(wallet, pin_code, sc_address):
+    get_auth_token()
     wallet_id = wallet["id"]
     data = {
         "pincode": pin_code,
@@ -216,6 +226,7 @@ def stake(wallet, pin_code, sc_address, amount_to_stake):
 
 
 def get_transaction_status(tx_status):
+    get_auth_token()
     response = requests.get(
         f"https://api-wallet.venly.io/api/transactions/BSC/{tx_status}/status",
         headers=AUTH_HEADERS,
@@ -224,10 +235,7 @@ def get_transaction_status(tx_status):
 
 
 def execute_stake(wallet_address, bnb_to_stake, project_id):
-    # return {
-    #     "hash": "0x704583309c5364702bb215c81d1a859e5a918ca2a0a9c0b2beac56f8747c8faf",
-    # }
-    get_auth_token()
+    # get_auth_token()
     pin_code = PIN_CODE
     sc_address = Project.objects.get(pk=project_id).staking_address
     wallet = get_wallet_by_address(wallet_address)
@@ -253,6 +261,10 @@ def execute_stake(wallet_address, bnb_to_stake, project_id):
         else:
             time.sleep(2)
     tx_hash = approve_smart_contract(wallet, pin_code, sc_address)
+    if not tx_hash["success"] and tx_hash["errors"][0]["code"] == "pincode.incorrect":
+        pin_code = "9294"
+        tx_hash = approve_smart_contract(wallet, pin_code, sc_address)
+    pprint(tx_hash)
     tx_hash = tx_hash["result"]["transactionHash"]
     while True:
         get_auth_token()

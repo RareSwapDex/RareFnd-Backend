@@ -638,6 +638,7 @@ def mercuryo_callback(request):
         bnb_to_stake = data["amount"]
         wallet_address = data["tx"]["address"]
         contributor_email = data["user"]["email"]
+        print(wallet_address)
         response = venly.execute_stake(wallet_address, bnb_to_stake, project_id)
         if response is None:
             return Response(

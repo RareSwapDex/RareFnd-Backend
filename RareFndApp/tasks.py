@@ -118,6 +118,8 @@ def check_pending_contributions():
                     ) * get_fnd_usd_value(FND, BNB, BUSD, FND_BNB, router_pancake_swap)[
                         "fnd_usd"
                     ]
+            except Exception:
+                pprint(decoded_tx)
             tx_timestamp = web3.eth.get_block(tx_block_number)["timestamp"]
             tx_project_live = getattr(tx_project, "live")
             tx_project_live_datetime = getattr(
