@@ -585,7 +585,7 @@ def create_mercuryo_checkout_url(
     pprint(data)
     wallet = venly.get_or_create_wallet(data["contributionEmail"])
     signature = sha512(
-        f"{wallet.get('add_ress')}{MERCURYO_SECRET_KEY}".encode("utf-8")
+        f"{wallet.get('address')}{MERCURYO_SECRET_KEY}".encode("utf-8")
     ).hexdigest()
     merchant_transaction_id = (
         f"{data['contributionAmount']}-{data['projectId']}-{data['selectedIncentive']}-"
