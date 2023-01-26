@@ -611,11 +611,11 @@ def mercuryo_callback_wallet_received_bnb(request):
         usd_amount_to_stake = data["fiat_amount"]
         bnb_to_stake = data["amount"]
         wallet_address = data["tx"]["address"]
-        MercuryoPendingStake.objects.filter(
-            wallet_address=wallet_address, usd_amount=usd_amount_to_stake
-        ).update(bnb_amount=bnb_to_stake)
+        MercuryoPendingStake.objects.filter(wallet_address=wallet_address).update(
+            bnb_amount=bnb_to_stake
+        )
         target_pending_tx = MercuryoPendingStake.objects.filter(
-            wallet_address=wallet_address, usd_amount=usd_amount_to_stake
+            wallet_address=wallet_address
         )[0]
         # ##############
         # current_time = timezone.now()
