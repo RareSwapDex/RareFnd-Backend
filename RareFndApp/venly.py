@@ -264,7 +264,6 @@ def execute_stake(wallet_address, bnb_to_stake, project_id):
     if not tx_hash["success"] and tx_hash["errors"][0]["code"] == "pincode.incorrect":
         pin_code = "9294"
         tx_hash = approve_smart_contract(wallet, pin_code, sc_address)
-    pprint(tx_hash)
     tx_hash = tx_hash["result"]["transactionHash"]
     while True:
         get_auth_token()
