@@ -19,6 +19,7 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parent.parent
 MEDIA_ROOT = os.path.join(BASE_DIR, "files")
 MEDIA_URL = "files/"
+DATA_UPLOAD_MAX_MEMORY_SIZE = 15242880
 
 
 # Quick-start development settings - unsuitable for production
@@ -61,7 +62,6 @@ INSTALLED_APPS = [
     "django_email_verification",
     "storages",
     "requests",
-    # "coinbase_commerce",
 ]
 
 
