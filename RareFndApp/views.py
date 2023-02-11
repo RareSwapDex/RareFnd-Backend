@@ -769,6 +769,8 @@ def coinbase_webhook(request):
         return Response({"message": f"{str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
     if event["type"] == "charge:confirmed":
+        if not (event["data"]["metadata"].get("project_id")):
+            return Response({"message": "No project_id, mostly it means that the webhook was meant to be for RareAntiquities"}, status=status.HTTP_200_OK)
         project_id = int(event["data"]["metadata"]["project_id"])
         pprint(event["data"])
         selected_incentive = (
@@ -795,7 +797,8 @@ def coinbase_webhook(request):
         # add_amount_to_project_raised_amount(project_id, contribution_amount)
         # # Check if project reached target amount
         # check_project_reached_target(project_id)
-    return Response({"message": "success"}, status=status.HTTP_200_OK)
+        return Response({"message": "success"}, status=status.HTTP_200_OK)
+    return Response({"message": "event['type'] != 'charge:confirmed' (not a relevant type)"}, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])
@@ -871,6 +874,8 @@ def stripe_webhook(request):
         # Get checkout session related to this id
         c_s = stripe.checkout.Session.list(payment_intent=payment_intent_id)
         # Add contribution to "Contribution" table
+        if not c_s["data"][0]["metadata"].get("project_id"):
+            return Response({"message": "No project_id, mostly it means that the webhook was meant to be for RareAntiquities"}, status=status.HTTP_200_OK)
         project_id = c_s["data"][0]["metadata"]["project_id"]
         contributor_email = c_s["data"][0]["metadata"]["contributor_email"]
         contribution_amount = float(payment_intent["amount_received"] / 100)
@@ -889,7 +894,7 @@ def stripe_webhook(request):
         # # Check if project reached target amount
         # check_project_reached_target(project_id)
         return Response({"message": "success"}, status=status.HTTP_200_OK)
-    return HttpResponse(status=200)
+    return Response({"message": "not payment_intent.succeeded event (event which is not relevant)"}, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])
