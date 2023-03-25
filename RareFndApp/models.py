@@ -188,7 +188,7 @@ class Project(models.Model):
     # Basics
     owner = models.ForeignKey(User, null=True, blank=False, on_delete=models.SET_NULL)
     title = models.CharField(max_length=254, null=True, blank=False, unique=True)
-    head = models.TextField(max_length=280, null=True, blank=False)
+    head = models.TextField(max_length=500, null=True, blank=False)
     country = models.ForeignKey(
         EligibleCountry, null=True, blank=False, on_delete=models.SET_NULL
     )
