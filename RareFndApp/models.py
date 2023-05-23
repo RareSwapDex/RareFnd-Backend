@@ -122,6 +122,9 @@ def get_category_files_directory(instance, filename):
 
 class Category(models.Model):
     name = models.CharField(max_length=254, null=False, blank=False, unique=True)
+    arabic_name = models.CharField(max_length=254, null=True, blank=True, unique=True)
+    subheader = models.CharField(max_length=254, null=True, blank=True)
+    arabic_subheader = models.CharField(max_length=254, null=True, blank=True)
     image = models.ImageField(
         blank=False,
         null=False,
@@ -266,7 +269,6 @@ class Project(models.Model):
     # company_tokenomics_url = models.CharField(max_length=1000, null=True, blank=True)
     company_ubos = JSONField(null=True, default=dict, blank=True)
     wallet_address = models.CharField(max_length=254, null=True, blank=True)
-
     current_reward = models.FloatField(null=False, blank=False, default=0)
     raised_amount = models.FloatField(null=True, blank=True, default=0)
     rewarded_amount = models.FloatField(null=True, blank=True, default=0)
@@ -274,6 +276,8 @@ class Project(models.Model):
     staking_abi = models.TextField(max_length=10000, null=True, blank=True)
     approved = models.BooleanField(default=False)
     live = models.BooleanField(default=False)
+    featured = models.BooleanField(default=False)
+    recommended = models.BooleanField(default=False)
     project_live_datetime = models.DateTimeField(null=True, default=None, blank=True)
     subscribed_users = models.ManyToManyField(
         User, related_name="Projects", default=None, blank=True

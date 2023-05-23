@@ -59,6 +59,7 @@ import stripe
 from .models_helper_functions import *
 from .shopify_helper_functions import *
 from hashlib import sha512
+from django.db.models import F, FloatField, ExpressionWrapper
 
 
 S3_BUCKET_KEY = settings.AWS_SECRET_ACCESS_KEY
@@ -82,37 +83,6 @@ s3_session = boto3.Session(
 )
 s3 = s3_session.resource("s3")
 bucket = s3.Bucket(S3_BUCKET_NAME)
-
-
-# username='support@rarefnd.com'
-# password='@Beastmode9294'
-# mailserver = smtplib.SMTP('smtp.office365.com',587)
-# mailserver.ehlo()
-# mailserver.starttls()
-# mailserver.login(username, password)
-# #Adding a newline before the body text fixes the missing message body
-# mailserver.sendmail('support@rarefnd.com','benharkatdjalil@gmail.com','\npython email')
-# mailserver.quit()
-
-
-# print("plplplplplplplpl")
-# a = get_user_model().objects.create(
-#     username="jaliloppl",
-#     password="jalilrooney",
-#     email="benharkatdjalil@gmail.com",
-#     first_name="Abdeldjalil",
-#     last_name="BENHARKAT",
-#     phone="+213699752382",
-#     wallet_address="0xCd3907Eb16A965445F91A75194A20C1E58127edd",
-# )
-# a.is_active = False
-# print("k")
-# try:
-#     b = send_email(a)
-# except:
-#     print(traceback.format_exc())
-# print("lllllllllll")
-# print("qwqwqwwqwq", b)
 
 
 def main(request):
@@ -397,6 +367,7 @@ def projects_from_category(request, category_name):
     if category_name == "all":
         try:
             projects = Project.objects.filter(approved=True)
+
         except Project.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
     else:
@@ -404,11 +375,40 @@ def projects_from_category(request, category_name):
             projects = Project.objects.filter(
                 category__name=category_name, approved=True
             )
+
         except Project.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-    if request.method == "GET":
-        serializer = ProjectSerializer(projects, many=True)
-        return Response({"projects": serializer.data})
+    serializer = ProjectSerializer(projects, many=True)
+    featured_projects = projects.filter(featured=True)
+    recommended_projects = projects.filter(recommended=True)
+    top_5_newest_projects = projects.filter(
+        live=True,
+        project_live_datetime__isnull=False,
+    ).order_by("-project_live_datetime")[:5]
+
+    # get home_stretch_projects
+    home_stretch_projects = (
+        projects.filter(live=True)
+        .annotate(
+            diff_amount=ExpressionWrapper(
+                F("fund_amount") - F("raised_amount"), output_field=FloatField()
+            )
+        )
+        .order_by("diff_amount")[:5]
+    )
+
+    serializer = {
+        "all_projects": ProjectSerializer(projects, many=True).data,
+        "featured_projects": ProjectSerializer(featured_projects, many=True).data,
+        "recommended_projects": ProjectSerializer(recommended_projects, many=True).data,
+        "top_5_newest_projects": ProjectSerializer(
+            top_5_newest_projects, many=True
+        ).data,
+        "home_stretch_projects": ProjectSerializer(
+            home_stretch_projects, many=True
+        ).data,
+    }
+    return Response({"projects": serializer})
 
 
 @api_view(["GET"])
@@ -580,6 +580,7 @@ def venly_execute_swap(request):
 def create_mercuryo_checkout_url(
     request,
 ):
+    print("llllllll")
     data = request.data
     pprint(request)
     pprint(data)
@@ -770,7 +771,12 @@ def coinbase_webhook(request):
 
     if event["type"] == "charge:confirmed":
         if not (event["data"]["metadata"].get("project_id")):
-            return Response({"message": "No project_id, mostly it means that the webhook was meant to be for RareAntiquities"}, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "message": "No project_id, mostly it means that the webhook was meant to be for RareAntiquities"
+                },
+                status=status.HTTP_200_OK,
+            )
         project_id = int(event["data"]["metadata"]["project_id"])
         pprint(event["data"])
         selected_incentive = (
@@ -798,7 +804,10 @@ def coinbase_webhook(request):
         # # Check if project reached target amount
         # check_project_reached_target(project_id)
         return Response({"message": "success"}, status=status.HTTP_200_OK)
-    return Response({"message": "event['type'] != 'charge:confirmed' (not a relevant type)"}, status=status.HTTP_200_OK)
+    return Response(
+        {"message": "event['type'] != 'charge:confirmed' (not a relevant type)"},
+        status=status.HTTP_200_OK,
+    )
 
 
 @api_view(["POST"])
@@ -875,7 +884,12 @@ def stripe_webhook(request):
         c_s = stripe.checkout.Session.list(payment_intent=payment_intent_id)
         # Add contribution to "Contribution" table
         if not c_s["data"][0]["metadata"].get("project_id"):
-            return Response({"message": "No project_id, mostly it means that the webhook was meant to be for RareAntiquities"}, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "message": "No project_id, mostly it means that the webhook was meant to be for RareAntiquities"
+                },
+                status=status.HTTP_200_OK,
+            )
         project_id = c_s["data"][0]["metadata"]["project_id"]
         contributor_email = c_s["data"][0]["metadata"]["contributor_email"]
         contribution_amount = float(payment_intent["amount_received"] / 100)
@@ -894,7 +908,10 @@ def stripe_webhook(request):
         # # Check if project reached target amount
         # check_project_reached_target(project_id)
         return Response({"message": "success"}, status=status.HTTP_200_OK)
-    return Response({"message": "not payment_intent.succeeded event (event which is not relevant)"}, status=status.HTTP_200_OK)
+    return Response(
+        {"message": "not payment_intent.succeeded event (event which is not relevant)"},
+        status=status.HTTP_200_OK,
+    )
 
 
 @api_view(["POST"])
@@ -941,3 +958,18 @@ def shopify_create_checkout(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
     )
+
+
+@api_view(["POST"])
+def get_exchange_rate(request):
+    data = request.data
+    headers = {"apikey": config("EXCHANGE_RATES_API_KEY")}
+    response = requests.get(
+        f"https://api.apilayer.com/exchangerates_data/convert?to=USD&from={data['from']}&amount={data['amount']}",
+        headers=headers,
+    ).json()
+    pprint(response)
+    if response["success"]:
+        return Response(response, status=status.HTTP_200_OK)
+    else:
+        return Response(response, status=status.HTTP_400_BAD_REQUEST)

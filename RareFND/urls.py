@@ -97,6 +97,7 @@ urlpatterns = [
     path("api/coinbase/create-charge/", views.coinbase_create_charge),
     path("api/stripe/webhook/", views.stripe_webhook),
     path("api/stripe/create-charge/", views.stripe_create_charge),
+    path("api/currency-exchange/", views.get_exchange_rate),
     # path("api/shopify/webhook/", views.shopify_webhook),
     # path("api/shopify/create-charge/", views.shopify_create_checkout),
 ]

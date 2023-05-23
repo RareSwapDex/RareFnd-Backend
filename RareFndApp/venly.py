@@ -41,6 +41,7 @@ def get_auth_token():
         urllib.parse.urlencode(details),
         headers={"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
     ).json()
+    pprint(response)
     AUTH_TOKEN = response["access_token"]
     AUTH_HEADERS = {"Authorization": f"Bearer {AUTH_TOKEN}"}
 

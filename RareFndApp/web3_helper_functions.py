@@ -16,3 +16,7 @@ def get_transactions_details(tx_hash):
     a = web3.eth.getTransaction(tx_hash)
     chain = get_transaction_chain(tx_hash)
     pprint(a)
+
+
+def create_wallets():
+    pass

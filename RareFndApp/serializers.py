@@ -77,13 +77,15 @@ class ProjectSerializer(serializers.ModelSerializer):
             "company_country",
             "number_of_subscribed_users",
             "number_of_donators",
+            "featured",
+            "recommended",
         ]
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ["id", "name", "image"]
+        fields = ["id", "name", "arabic_name", "subheader", "arabic_subheader", "image"]
 
 
 class ContributionSerializer(serializers.ModelSerializer):
