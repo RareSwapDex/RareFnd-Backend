@@ -112,6 +112,8 @@ CKEDITOR_CONFIGS = {
             ["ShowBlocks", "Source", "About"],
         ],
         "extraPlugins": ",".join(["youtube", "html5video"]),
+        "allowedContent": True,
+        "disallowedContent": "script; *[on*]",
     },
 }
 
