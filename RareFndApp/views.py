@@ -193,56 +193,52 @@ def add_project(request):
                     and "File" not in ubo_data
                 ],
                 description=request.data.get("story.projectStory"),
-                company_name=request.data.get("basics.projectOwnerType") == "Company"
-                if request.data.get("payment.companyName")
+                company_name=request.data.get("payment.companyName")
+                if request.data.get("basics.projectOwnerType") == "Company"
                 else None,
-                company_nature_of_business=request.data.get("basics.projectOwnerType")
-                == "Company"
-                if request.data.get("payment.natureOfBusiness")
+                company_nature_of_business=request.data.get("payment.natureOfBusiness")
+                if request.data.get("basics.projectOwnerType")
                 else None,
-                company_address=request.data.get("basics.projectOwnerType") == "Company"
-                if request.data.get("payment.companyAddress")
+                company_address=request.data.get("payment.companyAddress")
+                if request.data.get("basics.projectOwnerType") == "Company"
                 else None,
-                company_city=request.data.get("basics.projectOwnerType") == "Company"
-                if request.data.get("payment.companyCity")
+                company_city=request.data.get("payment.companyCity")
+                if request.data.get("basics.projectOwnerType") == "Company"
                 else None,
-                company_zip_code=request.data.get("basics.projectOwnerType")
-                == "Company"
-                if request.data.get("payment.companyZipCode")
+                company_zip_code=request.data.get("payment.companyZipCode")
+                if request.data.get("basics.projectOwnerType") == "Company"
                 else None,
-                company_country_id=request.data.get("basics.projectOwnerType")
-                == "Company"
-                if request.data.get("payment.companyCountry")
-                and EligibleCountry.objects.get(
+                company_country_id=EligibleCountry.objects.get(
                     nicename=request.data.get("payment.companyCountry")
                 ).id
+                if request.data.get("basics.projectOwnerType") == "Company"
+                and request.data.get("payment.companyCountry")
                 else None,
-                company_incorporation_date=request.data.get("basics.projectOwnerType")
-                == "Company"
-                if request.data.get("payment.projectIncorporationDate")
+                company_incorporation_date=request.data.get(
+                    "payment.projectIncorporationDate"
+                )
+                if request.data.get("basics.projectOwnerType") == "Company"
                 else None,
-                company_registration_number=request.data.get("basics.projectOwnerType")
-                == "Company"
-                if request.data.get("payment.companyRegistrationNumber")
+                company_registration_number=request.data.get(
+                    "payment.companyRegistrationNumber"
+                )
+                if request.data.get("basics.projectOwnerType") == "Company"
                 else None,
                 company_estimated_annual_turnover=request.data.get(
-                    "basics.projectOwnerType"
+                    "payment.companyEstimatedAnnualTurnover"
                 )
-                == "Company"
-                if request.data.get("payment.companyEstimatedAnnualTurnover")
+                if request.data.get("basics.projectOwnerType") == "Company"
                 else None,
-                company_tax_country_id=request.data.get("basics.projectOwnerType")
-                == "Company"
-                if request.data.get("payment.projectTaxCountry")
-                and EligibleCountry.objects.get(
+                company_tax_country_id=EligibleCountry.objects.get(
                     nicename=request.data.get("payment.projectTaxCountry")
                 ).id
+                if request.data.get("basics.projectOwnerType") == "Company"
+                and request.data.get("payment.projectTaxCountry")
                 else None,
                 company_tax_identification_number=request.data.get(
-                    "basics.projectOwnerType"
+                    "payment.taxIdNumber"
                 )
-                == "Company"
-                if request.data.get("payment.taxIdNumber")
+                if request.data.get("basics.projectOwnerType") == "Company"
                 else None,
                 wallet_address=request.data.get("payment.ownerWalletAddress"),
                 # company_white_paper_url=request.data.get("payment.whitePaperUrl"),
