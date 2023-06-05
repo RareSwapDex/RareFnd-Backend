@@ -189,6 +189,7 @@ def get_project_files_directory(instance, filename):
 
 class Project(models.Model):
     # Basics
+    owner_type = models.CharField(max_length=254, null=True, blank=True)
     owner = models.ForeignKey(User, null=True, blank=False, on_delete=models.SET_NULL)
     title = models.CharField(max_length=254, null=True, blank=False, unique=True)
     head = models.TextField(max_length=500, null=True, blank=False)
@@ -214,6 +215,7 @@ class Project(models.Model):
     type = models.ForeignKey(Type, null=True, blank=False, on_delete=models.SET_NULL)
     # Funding
     fund_amount = models.FloatField(null=True, blank=False)
+    fund_spend = JSONField(null=True, default=dict, blank=True)
     # Story
     description = RichTextField(
         max_length=100000,
@@ -233,37 +235,35 @@ class Project(models.Model):
         ],
     )
     # Payment
-    company_name = models.CharField(max_length=254, null=True, blank=False)
-    company_nature_of_business = models.CharField(
-        max_length=254, null=True, blank=False
-    )
-    company_address = models.CharField(max_length=254, null=True, blank=False)
-    company_city = models.CharField(max_length=254, null=True, blank=False)
-    company_zip_code = models.CharField(max_length=254, null=True, blank=False)
+    company_name = models.CharField(max_length=254, null=True, blank=True)
+    company_nature_of_business = models.CharField(max_length=254, null=True, blank=True)
+    company_address = models.CharField(max_length=254, null=True, blank=True)
+    company_city = models.CharField(max_length=254, null=True, blank=True)
+    company_zip_code = models.CharField(max_length=254, null=True, blank=True)
     company_country = models.ForeignKey(
         EligibleCountry,
         null=True,
-        blank=False,
+        blank=True,
         on_delete=models.SET_NULL,
         related_name="company_tax_country",
     )
     company_incorporation_date = models.DateTimeField(null=True, default=None)
     company_registration_number = models.CharField(
-        max_length=254, null=True, blank=False
+        max_length=254, null=True, blank=True
     )
     company_estimated_annual_turnover = models.CharField(
-        max_length=254, null=True, blank=False
+        max_length=254, null=True, blank=True
     )
     company_tax_country = models.ForeignKey(
         EligibleCountry,
         null=True,
-        blank=False,
+        blank=True,
         on_delete=models.SET_NULL,
         related_name="ubo_company_tax_country",
     )
 
     company_tax_identification_number = models.CharField(
-        max_length=254, null=True, blank=False
+        max_length=254, null=True, blank=True
     )
     # company_white_paper_url = models.CharField(max_length=1000, null=True, blank=True)
     # company_tokenomics_url = models.CharField(max_length=1000, null=True, blank=True)

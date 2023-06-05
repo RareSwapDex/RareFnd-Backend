@@ -159,6 +159,7 @@ def add_project(request):
         try:
             project = Project(
                 owner=request.user,
+                owner_type=request.data.get("basics.projectOwnerType"),
                 title=request.data.get("basics.projectTitle"),
                 head=request.data.get("basics.projectHead"),
                 country_id=EligibleCountry.objects.get(
@@ -185,30 +186,64 @@ def add_project(request):
                     name=request.data.get("basics.projectType")
                 ).id,
                 fund_amount=request.data.get("funding.projectFundsAmount"),
+                fund_spend=[
+                    {ubo_data: request.data[ubo_data]}
+                    for ubo_data in request.data
+                    if ubo_data.startswith("funding.fundingSpend")
+                    and "File" not in ubo_data
+                ],
                 description=request.data.get("story.projectStory"),
-                company_name=request.data.get("payment.companyName"),
-                company_nature_of_business=request.data.get("payment.natureOfBusiness"),
-                company_address=request.data.get("payment.companyAddress"),
-                company_city=request.data.get("payment.companyCity"),
-                company_zip_code=request.data.get("payment.companyZipCode"),
-                company_country_id=EligibleCountry.objects.get(
+                company_name=request.data.get("basics.projectOwnerType") == "Company"
+                if request.data.get("payment.companyName")
+                else None,
+                company_nature_of_business=request.data.get("basics.projectOwnerType")
+                == "Company"
+                if request.data.get("payment.natureOfBusiness")
+                else None,
+                company_address=request.data.get("basics.projectOwnerType") == "Company"
+                if request.data.get("payment.companyAddress")
+                else None,
+                company_city=request.data.get("basics.projectOwnerType") == "Company"
+                if request.data.get("payment.companyCity")
+                else None,
+                company_zip_code=request.data.get("basics.projectOwnerType")
+                == "Company"
+                if request.data.get("payment.companyZipCode")
+                else None,
+                company_country_id=request.data.get("basics.projectOwnerType")
+                == "Company"
+                if request.data.get("payment.companyCountry")
+                and EligibleCountry.objects.get(
                     nicename=request.data.get("payment.companyCountry")
-                ).id,
-                company_incorporation_date=request.data.get(
-                    "payment.projectIncorporationDate"
-                ),
-                company_registration_number=request.data.get(
-                    "payment.companyRegistrationNumber"
-                ),
+                ).id
+                else None,
+                company_incorporation_date=request.data.get("basics.projectOwnerType")
+                == "Company"
+                if request.data.get("payment.projectIncorporationDate")
+                else None,
+                company_registration_number=request.data.get("basics.projectOwnerType")
+                == "Company"
+                if request.data.get("payment.companyRegistrationNumber")
+                else None,
                 company_estimated_annual_turnover=request.data.get(
-                    "payment.companyEstimatedAnnualTurnover"
-                ),
-                company_tax_country_id=EligibleCountry.objects.get(
+                    "basics.projectOwnerType"
+                )
+                == "Company"
+                if request.data.get("payment.companyEstimatedAnnualTurnover")
+                else None,
+                company_tax_country_id=request.data.get("basics.projectOwnerType")
+                == "Company"
+                if request.data.get("payment.projectTaxCountry")
+                and EligibleCountry.objects.get(
                     nicename=request.data.get("payment.projectTaxCountry")
-                ).id,
+                ).id
+                else None,
                 company_tax_identification_number=request.data.get(
-                    "payment.taxIdNumber"
-                ),
+                    "basics.projectOwnerType"
+                )
+                == "Company"
+                if request.data.get("payment.taxIdNumber")
+                else None,
                 wallet_address=request.data.get("payment.ownerWalletAddress"),
                 # company_white_paper_url=request.data.get("payment.whitePaperUrl"),
                 # company_tokenomics_url=request.data.get("payment.tokenomicsUrl"),
