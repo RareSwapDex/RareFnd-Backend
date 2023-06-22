@@ -276,7 +276,7 @@ class Project(models.Model):
     rewarded_amount = models.FloatField(null=True, blank=True, default=0)
     staking_address = models.CharField(max_length=254, null=True, blank=True)
     staking_abi = models.TextField(max_length=10000, null=True, blank=True)
-    approved = models.BooleanField(default=False)
+    approved = models.BooleanField(default=True)
     live = models.BooleanField(default=False)
     featured = models.BooleanField(default=False)
     recommended = models.BooleanField(default=False)
