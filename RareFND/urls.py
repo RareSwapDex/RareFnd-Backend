@@ -71,6 +71,7 @@ urlpatterns = [
     path("api/project/", views.projects_list),
     path("api/project/<int:id>/", views.projects_details_by_id),
     path("api/projects/<str:title>/", views.projects_details_by_title),
+    path("api/project/<str:project_title>/", views.change_project_details_by_title),
     path("api/projects/user/<str:username>/", views.projects_details_by_owner_username),
     path("api/project/title/", views.projects_details_by_title),
     path("api/category/", views.categories_list),

@@ -44,6 +44,7 @@ from django.contrib.auth.decorators import login_required
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken, SlidingToken, UntypedToken
 import boto3
+from django.core.mail import EmailMessage
 from django.conf import settings
 import urllib
 import random
@@ -283,6 +284,7 @@ def add_project(request):
                     ),
                     price=float(rewards_dict[reward].get("incentivePrice")),
                     project=project,
+                    approved=True,
                 )
                 incentive.clean()
                 incentive.save()
@@ -296,6 +298,39 @@ def add_project(request):
                         ),
                     )
                     file.save()
+
+            campaign_url = (
+                f"https://rarefnd.com/projects/{request.user.username}/"
+                + request.data.get("basics.projectTitle").replace(" ", "-")
+            )
+
+            email_message = f"""
+            <html>
+            <body>
+            <p>Congratulations! Your campaign, <strong>{request.data.get('basics.projectTitle')}</strong>, is now approved and has its very own dedicated page on RareFND.</p> 
+
+            <p>Access your campaign page directly via this <a href='{campaign_url}'>link</a>.</p>
+
+            <p>We highly encourage using this pre-launch phase to market your project extensively. Doing so will not only amplify your campaign's visibility but also help garner anticipation among potential contributors. This strategy can yield robust traction right from the moment your campaign goes live.</p>
+
+            <p>When your subscriber count meets your satisfaction, that's your cue to consider transitioning your campaign from pre-launch to live status.</p>
+
+            <p>Please note, the moment your campaign goes live, all subscribers will automatically receive an email notification inviting them to contribute.</p>
+
+            <p>Wishing you every success in your campaign marketing endeavors and we can't wait to see your project come to life!</p>
+
+            <p>Kind regards,<br>RareFND Team</p>
+            </body>
+            </html>
+            """
+            backend_send_html_email(
+                subject="RareFND: Your Campaign is Approved and Ready for Marketing",
+                message=email_message,
+                email_from=settings.EMAIL_HOST_USER,
+                recipient_list=[
+                    request.user.email,
+                ],
+            )
             return Response(status=status.HTTP_201_CREATED)
         except Exception as e:
             print(traceback.format_exc())
@@ -702,6 +737,17 @@ def backend_send_email(subject, message, email_from, recipient_list):
     send_mail(subject, message, email_from, recipient_list)
 
 
+def backend_send_html_email(subject, message, email_from, recipient_list):
+    email = EmailMessage(
+        subject,
+        message,
+        email_from,
+        recipient_list,
+    )
+    email.content_subtype = "html"
+    email.send()
+
+
 @api_view(["POST"])
 def user_reset_password(request):
     email = request.data["email"]
@@ -1004,3 +1050,30 @@ def get_exchange_rate(request):
         return Response(response, status=status.HTTP_200_OK)
     else:
         return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["PUT"])
+def change_project_details_by_title(request, project_title):
+    data = request.data
+    pprint(data)
+    project = Project.objects.filter(title__iexact=project_title)
+    if len(project) <= 0:
+        return Response(
+            {"message": "Invalid project title"}, status=status.HTTP_400_BAD_REQUEST
+        )
+    project = project[0]
+    if data.get("projectHead"):
+        project.head = data.get("projectHead")
+    if type(data.get("projectImageFile")) != str:
+        project.thumbnail = ImageFile(
+            io.BytesIO(data.get("projectImageFile").read()),
+            name="thumbnail.jpg",
+        )
+    if data.get("projectStory"):
+        project.description = data.get("projectStory")
+    if data.get("walletAddress"):
+        project.wallet_address = data.get("walletAddress")
+    project.clean()
+    project.save()
+    print(project.head)
+    return Response({"message": "success"}, status=status.HTTP_200_OK)
