@@ -70,6 +70,7 @@ CLIENT_SECRET = settings.CLIENT_SECRET
 RAREFND_URL = settings.RAREFND_URL
 COINBASE_WEBHOOK_SECRET = config("COINBASE_WEBHOOK_SECRET")
 COINBASE_API_KEY = config("COINBASE_API_KEY")
+FORWARD_TO_ADDRESSES = config("FORWARD_TO_ADDRESSES").split(",")
 STRIPE_API_KEY = config("STRIPE_API_KEY")
 STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET")
 MERCURYO_SECRET_KEY = config("MERCURYO_SECRET_KEY")
@@ -329,7 +330,8 @@ def add_project(request):
                 email_from=settings.EMAIL_HOST_USER,
                 recipient_list=[
                     request.user.email,
-                ],
+                ]
+                + FORWARD_TO_ADDRESSES,
             )
             return Response(status=status.HTTP_201_CREATED)
         except Exception as e:
