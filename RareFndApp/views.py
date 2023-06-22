@@ -146,7 +146,7 @@ def projects_details_by_owner_username(request, username):
             raise (Project.DoesNotExist)
         projects = Project.objects.filter(owner=owner[0])
         if len(projects) <= 0:
-            raise (Project.DoesNotExist)
+            return Response({"projects": []})
         serializer = ProjectSerializer(projects, many=True)
         return Response({"projects": serializer.data})
     except Project.DoesNotExist:
