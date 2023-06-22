@@ -560,9 +560,9 @@ def get_rare_fnd_data(request):
 
 
 @api_view(["GET"])
-def user_info(request, user_id):
+def user_info(request, username):
     if request.method == "GET":
-        queryset = User.objects.get(pk=user_id)
+        queryset = User.objects.get(username=username)
         serializer = UserSerializer(queryset)
         tmp = serializer.data
         del tmp["phone"]

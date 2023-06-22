@@ -247,7 +247,9 @@ class Project(models.Model):
         on_delete=models.SET_NULL,
         related_name="company_tax_country",
     )
-    company_incorporation_date = models.DateTimeField(null=True, default=None)
+    company_incorporation_date = models.DateTimeField(
+        null=True, default=None, blank=True
+    )
     company_registration_number = models.CharField(
         max_length=254, null=True, blank=True
     )

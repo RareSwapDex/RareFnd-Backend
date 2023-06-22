@@ -48,7 +48,7 @@ urlpatterns = [
     path("api/user/check_reset_password_token/", views.check_reset_password_token),
     path("api/user/change_password/", views.user_change_password),
     path("api/incentives/<int:project_id>/", views.incentives),
-    path("api/profile/<int:user_id>/", views.user_info),
+    path("api/profile/<str:username>/", views.user_info),
     path("api/user/verify_email/", include(email_urls)),
     path("api/rarefnd/data/", views.get_rare_fnd_data),
     path("api/unique/<str:field_to_check>/<str:field_value>/", views.unique_record),
