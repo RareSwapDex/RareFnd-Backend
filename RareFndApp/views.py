@@ -1042,13 +1042,12 @@ def shopify_create_checkout(request):
 @api_view(["POST"])
 def get_exchange_rate(request):
     data = request.data
-    headers = {"apikey": config("EXCHANGE_RATES_API_KEY")}
+    api_key = config("EXCHANGE_RATES_API_KEY")
     response = requests.get(
-        f"https://api.apilayer.com/exchangerates_data/convert?to=USD&from={data['from']}&amount={data['amount']}",
-        headers=headers,
+        f"https://v6.exchangerate-api.com/v6/{api_key}/pair/{data['from']}/USD/{data['amount']}"
     ).json()
     pprint(response)
-    if response["success"]:
+    if response.get("result") == "success":
         return Response(response, status=status.HTTP_200_OK)
     else:
         return Response(response, status=status.HTTP_400_BAD_REQUEST)

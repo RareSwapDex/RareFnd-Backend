@@ -79,7 +79,8 @@ class ProjectSerializer(serializers.ModelSerializer):
             "number_of_donators",
             "featured",
             "recommended",
-            "wallet_address"
+            "wallet_address",
+            "currency",
         ]
 
 

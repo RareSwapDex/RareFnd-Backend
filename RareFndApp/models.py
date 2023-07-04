@@ -216,6 +216,7 @@ class Project(models.Model):
     # Funding
     fund_amount = models.FloatField(null=True, blank=False)
     fund_spend = JSONField(null=True, default=dict, blank=True)
+    currency = models.CharField(max_length=10, null=True, blank=True)
     # Story
     description = RichTextField(
         max_length=100000,
