@@ -173,7 +173,9 @@ def add_project(request):
                     name="thumbnail.jpg",
                 ),
                 launch_date=request.data.get("basics.projectLaunchDate"),
-                deadline=request.data.get("basics.projectDeadlineDate"),
+                deadline=request.data.get("basics.projectDeadlineDate")
+                .lower()
+                .replace("days", ""),
                 category_id=Category.objects.get(
                     name=request.data.get("basics.projectCategory")
                 ).id

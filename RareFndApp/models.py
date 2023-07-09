@@ -205,7 +205,18 @@ class Project(models.Model):
     )
     creation_datetime = models.DateTimeField(null=True, auto_now_add=True)
     launch_date = models.DateTimeField(null=True, default=None)
-    deadline = models.DateTimeField(null=True, default=None)
+    DEADLINE_CHOICES = [
+        ("30", "30 days"),
+        ("60", "60 days"),
+        ("90", "90 days"),
+    ]
+    deadline = models.CharField(
+        max_length=2,
+        choices=DEADLINE_CHOICES,
+        default="30",
+        null=True,
+        blank=True,
+    )
     category = models.ForeignKey(
         Category, null=True, blank=False, on_delete=models.SET_NULL
     )
