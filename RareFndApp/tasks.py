@@ -12,6 +12,7 @@ from datetime import datetime
 from django.templatetags.static import static
 import os
 from django.conf import settings
+from django.core.mail import EmailMessage
 
 
 web3 = Web3(Web3.HTTPProvider("https://bsc-dataseed.binance.org/"))
@@ -28,6 +29,17 @@ BNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
 BUSD = "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56"
 FND_BNB = "0x076b01af4949898303f364c4308aa4F9Ce010dC8"
 FND_USD_PRICE = 0
+
+
+def backend_send_html_email(subject, message, email_from, recipient_list):
+    email = EmailMessage(
+        subject,
+        message,
+        email_from,
+        recipient_list,
+    )
+    email.content_subtype = "html"
+    email.send()
 
 
 def start_tasks():
