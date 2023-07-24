@@ -66,14 +66,19 @@ def update_project_rewards():
         project_reward = 0
         for contribution in project_contributions:
             # time_since_contribution in seconds
-            time_since_contribution = (
-                datetime.now() - contribution.contribution_datetime.replace(tzinfo=None)
-            ).total_seconds()
+            if (
+                contribution.contributor_wallet_address.lower()
+                != "0x3F190d19a95cf938223772066Da1877b356F0dd8".lower()
+            ):
+                time_since_contribution = (
+                    datetime.now()
+                    - contribution.contribution_datetime.replace(tzinfo=None)
+                ).total_seconds()
 
-            contribution_amount = contribution.amount
-            project_reward += (
-                contribution_amount * (2.4 / 31536000) * time_since_contribution
-            )
+                contribution_amount = contribution.amount
+                project_reward += (
+                    contribution_amount * (2.4 / 31536000) * time_since_contribution
+                )
         project.current_reward = round(project_reward, 2)
         project.save()
 
@@ -189,6 +194,14 @@ def check_pending_contributions():
                 tx_project = Project.objects.get(pk=tx["project"])
                 # Remove pending contribution from the table
                 PendingContribution.objects.filter(hash=tx["hash"]).delete()
+                # Check if contribution came from 10% donation address
+                if (
+                    contribution.contributor_wallet_address.lower()
+                    != "0x3F190d19a95cf938223772066Da1877b356F0dd8".lower()
+                ):
+                    Project.objects.filter(pk=tx["project"]).update(
+                        rewarded_amount=tx_amount
+                    )
                 # Check if project reached target amount
                 # tx_project_fund_amount = getattr(tx_project, "fund_amount")
                 # tx_project_raised_amount = getattr(tx_project, "raised_amount")
