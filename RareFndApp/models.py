@@ -257,7 +257,7 @@ class Project(models.Model):
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name="company_tax_country",
+        related_name="project_company_tax_country",
     )
     company_incorporation_date = models.DateTimeField(
         null=True, default=None, blank=True
@@ -273,7 +273,7 @@ class Project(models.Model):
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name="ubo_company_tax_country",
+        related_name="project_ubo_company_tax_country",
     )
 
     company_tax_identification_number = models.CharField(
@@ -294,7 +294,7 @@ class Project(models.Model):
     recommended = models.BooleanField(default=False)
     project_live_datetime = models.DateTimeField(null=True, default=None, blank=True)
     subscribed_users = models.ManyToManyField(
-        User, related_name="Projects", default=None, blank=True
+        User, related_name="project_subscribers", default=None, blank=True
     )
 
     @property
@@ -320,6 +320,126 @@ class Project(models.Model):
             Contribution.objects.filter(project=self)
             .values("contributor_wallet_address")
             .distinct()
+        )
+
+    def __str__(self):
+        return self.title
+
+
+class RSVPSubscriber(models.Model):
+    name = models.CharField(max_length=254, null=True, blank=True)
+    email = LowerCaseCharField(max_length=254, unique=True, null=False, blank=False)
+
+
+def get_rsvp_files_directory(instance, filename):
+    if type(instance) is RSVP:
+        return f"rsvp/{instance.title}/{filename}"
+
+
+class RSVP(models.Model):
+    # Basics
+    owner_type = models.CharField(max_length=254, null=True, blank=True)
+    owner = models.ForeignKey(User, null=True, blank=False, on_delete=models.SET_NULL)
+    title = models.CharField(max_length=254, null=True, blank=False, unique=True)
+    head = models.TextField(max_length=500, null=True, blank=False)
+    country = models.ForeignKey(
+        EligibleCountry, null=True, blank=False, on_delete=models.SET_NULL
+    )
+    address = models.CharField(max_length=254, null=True, blank=False)
+    thumbnail = models.ImageField(
+        blank=False,
+        null=True,
+        default="help.jpg",
+        upload_to=get_rsvp_files_directory,
+    )
+    creation_datetime = models.DateTimeField(null=True, auto_now_add=True)
+    launch_date = models.DateTimeField(null=True, default=None)
+    DEADLINE_CHOICES = [
+        ("30", "30 days"),
+        ("60", "60 days"),
+        ("90", "90 days"),
+    ]
+    category = models.ForeignKey(
+        Category, null=True, blank=False, on_delete=models.SET_NULL
+    )
+    subcategory = models.ForeignKey(
+        Subcategory, blank=True, null=True, on_delete=models.SET_NULL
+    )
+    type = models.ForeignKey(Type, null=True, blank=False, on_delete=models.SET_NULL)
+    # Story
+    description = RichTextField(
+        max_length=100000,
+        null=True,
+        blank=False,
+        external_plugin_resources=[
+            (
+                "youtube",
+                "https://rarefnd-bucket.s3.us-east-2.amazonaws.com/ckeditor/ckeditor/plugins/youtube/youtube/",
+                "plugin.js",
+            ),
+            (
+                "html5video",
+                "https://rarefnd-bucket.s3.us-east-2.amazonaws.com/ckeditor/ckeditor/plugins/html5_video/html5video/",
+                "plugin.js",
+            ),
+        ],
+    )
+    # Payment
+    company_name = models.CharField(max_length=254, null=True, blank=True)
+    company_nature_of_business = models.CharField(max_length=254, null=True, blank=True)
+    company_address = models.CharField(max_length=254, null=True, blank=True)
+    company_city = models.CharField(max_length=254, null=True, blank=True)
+    company_zip_code = models.CharField(max_length=254, null=True, blank=True)
+    company_country = models.ForeignKey(
+        EligibleCountry,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="RSVP_company_tax_country",
+    )
+    company_incorporation_date = models.DateTimeField(
+        null=True, default=None, blank=True
+    )
+    company_registration_number = models.CharField(
+        max_length=254, null=True, blank=True
+    )
+    company_estimated_annual_turnover = models.CharField(
+        max_length=254, null=True, blank=True
+    )
+    company_tax_country = models.ForeignKey(
+        EligibleCountry,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="ubo_company_tax_country",
+    )
+
+    company_tax_identification_number = models.CharField(
+        max_length=254, null=True, blank=True
+    )
+    approved = models.BooleanField(default=True)
+    live = models.BooleanField(default=False)
+    featured = models.BooleanField(default=False)
+    recommended = models.BooleanField(default=False)
+    live_datetime = models.DateTimeField(null=True, default=None, blank=True)
+    subscribers = models.ManyToManyField(
+        RSVPSubscriber, related_name="RSVP_Subscribers", default=None, blank=True
+    )
+
+    @property
+    def number_of_subscribers(self):
+        return self.subscribers.count()
+
+    @property
+    def owner_username(self):
+        return self.owner.username
+
+    @property
+    def owner_profile_picture(self):
+        return (
+            self.owner.profile_picture.url
+            if self.owner.profile_picture
+            else "https://rarefnd-bucket.s3.us-east-2.amazonaws.com/users/avatar.jpg"
         )
 
     def __str__(self):
@@ -366,7 +486,7 @@ class Incentive(models.Model):
     )
 
     def __str__(self):
-        return self.title
+        return f"{self.title}  ---- {self.project.title}"
 
 
 class Contribution(models.Model):

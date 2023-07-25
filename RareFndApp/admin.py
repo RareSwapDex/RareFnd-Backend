@@ -14,6 +14,8 @@ from RareFndApp.models import (
     RareFndData,
     ProjectFile,
     EligibleCountry,
+    RSVP,
+    RSVPSubscriber,
 )
 import traceback
 from django import forms
@@ -315,4 +317,6 @@ admin.site.register(Incentive)
 admin.site.register(RareFndData)
 admin.site.register(ProjectFile)
 admin.site.register(EligibleCountry)
+admin.site.register(RSVP)
+admin.site.register(RSVPSubscriber)
 admin.site.register(Project, ProjectAdmin)

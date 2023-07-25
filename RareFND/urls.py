@@ -101,4 +101,6 @@ urlpatterns = [
     path("api/currency-exchange/", views.get_exchange_rate),
     # path("api/shopify/webhook/", views.shopify_webhook),
     # path("api/shopify/create-charge/", views.shopify_create_checkout),
+    path("api/rsvp/subscribe/", views.subscribe_to_rsvp),
+    path("api/rsvp/<str:title>/", views.rsvp_details_by_title),
 ]

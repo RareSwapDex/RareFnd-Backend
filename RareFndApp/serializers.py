@@ -14,6 +14,7 @@ from .models import (
     Incentive,
     RareFndData,
     EligibleCountry,
+    RSVP,
 )
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -175,6 +176,16 @@ class SubCategorySerializer(serializers.ModelSerializer):
 class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
+        fields = "__all__"
+
+
+class RSVPSerializer(serializers.ModelSerializer):
+    number_of_subscribers = serializers.ReadOnlyField()
+    owner_username = serializers.ReadOnlyField()
+    owner_profile_picture = serializers.ReadOnlyField()
+
+    class Meta:
+        model = RSVP
         fields = "__all__"
 
 

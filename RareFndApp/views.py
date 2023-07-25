@@ -17,6 +17,7 @@ from .serializers import (
     CountrySerializer,
     RareFndDataSerializer,
     EligibleCountrySerializer,
+    RSVPSerializer,
 )
 from .models import (
     Project,
@@ -32,6 +33,8 @@ from .models import (
     ProjectFile,
     Type,
     EligibleCountry,
+    RSVP,
+    RSVPSubscriber,
 )
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -136,6 +139,20 @@ def projects_details_by_title(request, title):
             return Response(serializer.data, status=status.HTTP_200_OK)
         print(serializer.errors)
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["GET", "PUT"])
+def rsvp_details_by_title(request, title):
+    try:
+        rsvp = RSVP.objects.filter(title__iexact=title)
+        if len(rsvp) <= 0:
+            raise (RSVP.DoesNotExist)
+        rsvp = rsvp[0]
+    except RSVP.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == "GET":
+        serializer = RSVPSerializer(rsvp)
+        return Response(serializer.data)
 
 
 @api_view(["GET"])
@@ -350,6 +367,24 @@ def subscribe_to_project(request):
             project.subscribed_users.add(request.user)
         return Response(status=status.HTTP_200_OK)
     except Exception:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(["PUT"])
+def subscribe_to_rsvp(request):
+    print("kkkkkkkkkkk")
+    print(request.data)
+    try:
+        rsvp = RSVP.objects.get(title=request.data["rsvpTitle"])
+        subscriber, created = RSVPSubscriber.objects.get_or_create(
+            email=request.data["email"], name=request.data["name"]
+        )
+        # Here, we add the subscriber to the RSVP object, whether it was just created or fetched from the database.
+        if subscriber not in rsvp.subscribers.all():
+            rsvp.subscribers.add(subscriber)
+        return Response(status=status.HTTP_200_OK)
+    except Exception:
+        print(traceback.format_exc())
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
