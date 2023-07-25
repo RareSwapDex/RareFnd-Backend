@@ -330,6 +330,9 @@ class RSVPSubscriber(models.Model):
     name = models.CharField(max_length=254, null=True, blank=True)
     email = LowerCaseCharField(max_length=254, unique=True, null=False, blank=False)
 
+    def __str__(self):
+        return f"{self.name} --- {self.email}"
+
 
 def get_rsvp_files_directory(instance, filename):
     if type(instance) is RSVP:
