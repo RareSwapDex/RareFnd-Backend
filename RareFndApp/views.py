@@ -372,8 +372,6 @@ def subscribe_to_project(request):
 
 @api_view(["PUT"])
 def subscribe_to_rsvp(request):
-    print("kkkkkkkkkkk")
-    print(request.data)
     try:
         rsvp = RSVP.objects.get(title=request.data["rsvpTitle"])
         subscriber, created = RSVPSubscriber.objects.get_or_create(

@@ -487,6 +487,7 @@ class Incentive(models.Model):
     project = models.ForeignKey(
         Project, null=False, blank=False, on_delete=models.CASCADE
     )
+    display_order = models.IntegerField(blank=True, null=True, default=None)
 
     def __str__(self):
         return f"{self.title}  ---- {self.project.title}"

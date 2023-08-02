@@ -148,6 +148,7 @@ class IncentiveSerializer(serializers.ModelSerializer):
             "price",
             "reserved",
             "project",
+            "display_order",
         ]
 
 
