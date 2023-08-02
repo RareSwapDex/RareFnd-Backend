@@ -155,17 +155,7 @@ class IncentiveSerializer(serializers.ModelSerializer):
 class IncentiveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Incentive
-        fields = [
-            "id",
-            "title",
-            "description",
-            "included_incentives",
-            "estimated_delivery",
-            "available_items",
-            "price",
-            "reserved",
-            "project",
-        ]
+        fields = "__all__"
 
 
 class SubCategorySerializer(serializers.ModelSerializer):
