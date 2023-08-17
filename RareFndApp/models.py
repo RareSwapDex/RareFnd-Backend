@@ -192,7 +192,7 @@ class Project(models.Model):
     owner_type = models.CharField(max_length=254, null=True, blank=True)
     owner = models.ForeignKey(User, null=True, blank=False, on_delete=models.SET_NULL)
     title = models.CharField(max_length=254, null=True, blank=False, unique=True)
-    head = models.TextField(max_length=500, null=True, blank=False)
+    head = models.TextField(max_length=600, null=True, blank=False)
     country = models.ForeignKey(
         EligibleCountry, null=True, blank=False, on_delete=models.SET_NULL
     )
