@@ -197,7 +197,7 @@ def check_pending_contributions():
                 # Check if contribution came from 10% donation address
                 if (
                     contribution.contributor_wallet_address.lower()
-                    != "0x3F190d19a95cf938223772066Da1877b356F0dd8".lower()
+                    == "0x3F190d19a95cf938223772066Da1877b356F0dd8".lower()
                 ):
                     Project.objects.filter(pk=tx["project"]).update(
                         rewarded_amount=tx_amount

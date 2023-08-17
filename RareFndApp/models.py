@@ -246,6 +246,7 @@ class Project(models.Model):
             ),
         ],
     )
+    ticket_price = models.FloatField(null=True, blank=True, default=0)
     # Payment
     company_name = models.CharField(max_length=254, null=True, blank=True)
     company_nature_of_business = models.CharField(max_length=254, null=True, blank=True)

@@ -82,6 +82,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "recommended",
             "wallet_address",
             "currency",
+            "ticket_price",
         ]
 
 
