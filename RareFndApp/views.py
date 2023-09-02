@@ -938,7 +938,7 @@ def stripe_create_charge(request):
         name=project_name,
         default_price_data={
             "currency": "usd",
-            "unit_amount_decimal": float(contribution_amount) * 100,
+            "unit_amount_decimal": round(float(contribution_amount), 2) * 100,
         },
         metadata={
             "name": project_name,
