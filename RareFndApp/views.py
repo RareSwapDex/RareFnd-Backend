@@ -684,7 +684,9 @@ def create_mercuryo_checkout_url(
     request,
 ):
     data = request.data
+    print("1 Getting wallet....")
     wallet = venly.get_or_create_wallet(data["contributionEmail"])
+    print("2 Got wallet", wallet)
     signature = sha512(
         f"{wallet.get('address')}{MERCURYO_SECRET_KEY}".encode("utf-8")
     ).hexdigest()
@@ -713,6 +715,7 @@ def create_mercuryo_checkout_url(
         "merchant_transaction_id": merchant_transaction_id,
     }
     checkout_url = f"https://exchange.mercuryo.io/?widget_id={payload['widget_id']}&address={payload['address']}&signature={payload['signature']}&fiat_amount={payload['amount']}&type={payload['type']}&fiat_currency={payload['from']}&currency={payload['to']}&email={payload['email']}&redirect_url={payload['redirect_url']}&merchant_transaction_id={payload['merchant_transaction_id']}"
+    print("3 checkout url", checkout_url)
     return Response({"checkout_url": checkout_url}, status=status.HTTP_200_OK)
 
 

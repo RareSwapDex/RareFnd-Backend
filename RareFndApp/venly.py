@@ -52,7 +52,7 @@ def get_wallet_by_identifier(identifier):
     response = requests.get(
         f"https://api-wallet.venly.io/api/wallets?identifier={identifier}",
         headers=AUTH_HEADERS,
-        timeout=10,
+        timeout=60,
     ).json()
     return response["result"] if response["success"] else "Failed"
 
@@ -93,7 +93,6 @@ def create_wallet(identifier):
 
 
 def get_or_create_wallet(identifier):
-    get_auth_token()
     venly_wallet = get_wallet_by_identifier(identifier)
     if venly_wallet != "Failed":
         if len(venly_wallet) > 0:
