@@ -40,6 +40,7 @@ def get_auth_token():
         "https://login.arkane.network/auth/realms/Arkane/protocol/openid-connect/token",
         urllib.parse.urlencode(details),
         headers={"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
+        timeout=10,
     ).json()
     pprint(response)
     AUTH_TOKEN = response["access_token"]
@@ -51,6 +52,7 @@ def get_wallet_by_identifier(identifier):
     response = requests.get(
         f"https://api-wallet.venly.io/api/wallets?identifier={identifier}",
         headers=AUTH_HEADERS,
+        timeout=10,
     ).json()
     return response["result"] if response["success"] else "Failed"
 
@@ -82,7 +84,10 @@ def create_wallet(identifier):
         "pincode": "9294",
     }
     response = requests.post(
-        "https://api-wallet.venly.io/api/wallets", json=data, headers=AUTH_HEADERS
+        "https://api-wallet.venly.io/api/wallets",
+        json=data,
+        headers=AUTH_HEADERS,
+        timeout=10,
     ).json()
     return response["result"] if response["success"] else "failed"
 

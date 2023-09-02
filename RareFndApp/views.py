@@ -683,10 +683,7 @@ def venly_execute_swap(request):
 def create_mercuryo_checkout_url(
     request,
 ):
-    print("llllllll")
     data = request.data
-    pprint(request)
-    pprint(data)
     wallet = venly.get_or_create_wallet(data["contributionEmail"])
     signature = sha512(
         f"{wallet.get('address')}{MERCURYO_SECRET_KEY}".encode("utf-8")
