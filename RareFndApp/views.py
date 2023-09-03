@@ -895,7 +895,8 @@ def coinbase_webhook(request):
         pprint(event["data"])
         selected_incentive = (
             int(event["data"]["metadata"]["selected_incentive"])
-            if event["data"]["metadata"]["selected_incentive"] != "false"
+            if event["data"]["metadata"].get("selected_incentive")
+            and event["data"]["metadata"]["selected_incentive"] != "false"
             else False
         )
         contributor_email = event["data"]["metadata"]["contributor_email"]
