@@ -915,7 +915,7 @@ def coinbase_webhook(request):
             selected_incentive,
         )
         # Add amount to project rased_amount
-        reward = add_amount_to_project_raised_amount(project_id, contribution_amount)
+        add_amount_to_project_raised_amount(project_id, contribution_amount)
         # Send email to contributor
         send_contribution_email(
             [contributor_email], reward, project_id, contribution_amount
@@ -1026,7 +1026,7 @@ def stripe_webhook(request):
         print(
             "7----------stripe_webhook", "add_contribution_to_contribution_table....."
         )
-        add_contribution_to_contribution_table(
+        reward = add_contribution_to_contribution_table(
             "0",
             contributor_email,
             project_id,
@@ -1037,7 +1037,7 @@ def stripe_webhook(request):
         )
         print("8----------stripe_webhook", "add_contribution_to_contribution_table")
         # Add amount to project rased_amount
-        reward = add_amount_to_project_raised_amount(project_id, contribution_amount)
+        add_amount_to_project_raised_amount(project_id, contribution_amount)
         print("9----------stripe_webhook", reward)
         # Send email to contributor
         send_contribution_email(
