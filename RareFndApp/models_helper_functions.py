@@ -82,6 +82,7 @@ def add_contribution_to_contribution_table(
         and Incentive.objects.get(pk=int(selected_incentive)).available_items > 0
         else False,
     )
+    returned_incentive_title = False
     if (
         selected_incentive
         and contribution_amount >= incentive_obj.price
@@ -91,16 +92,11 @@ def add_contribution_to_contribution_table(
             available_items=incentive_obj.available_items - 1,
             reserved=incentive_obj.reserved + 1,
         )
+        returned_incentive_title = incentive_obj.title
     c.clean()
     c.save()
 
-    return (
-        incentive_obj.title
-        if selected_incentive
-        and contribution_amount >= incentive_obj.price
-        and Incentive.objects.get(pk=int(selected_incentive)).available_items > 0
-        else False
-    )
+    return returned_incentive_title
 
 
 def send_contribution_email(recipient_list, reward, project_id, contribution_amount):
