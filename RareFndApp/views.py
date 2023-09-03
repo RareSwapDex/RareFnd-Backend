@@ -1015,7 +1015,11 @@ def stripe_webhook(request):
         project_id = c_s["data"][0]["metadata"]["project_id"]
         contributor_email = c_s["data"][0]["metadata"]["contributor_email"]
         contribution_amount = round(float(payment_intent["amount_received"] / 100), 2)
-        selected_incentive = c_s["data"][0]["metadata"]["selected_incentive"]
+        selected_incentive = (
+            c_s["data"][0]["metadata"].get("selected_incentive")
+            if c_s["data"][0]["metadata"].get("selected_incentive")
+            else "False"
+        )
         print(
             "7----------stripe_webhook", "add_contribution_to_contribution_table....."
         )
