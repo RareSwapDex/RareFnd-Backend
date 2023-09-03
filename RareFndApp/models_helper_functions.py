@@ -75,17 +75,17 @@ def add_contribution_to_contribution_table(
         ),
         selected_incentive=Incentive.objects.get(pk=int(selected_incentive))
         if selected_incentive
-        and Incentive.objects.get(pk=int(selected_incentive)).price > 0
+        and Incentive.objects.get(pk=int(selected_incentive)).available_items > 0
         else None,
         eligible_for_selected_incentive=contribution_amount >= incentive_obj.price
         if selected_incentive
-        and Incentive.objects.get(pk=int(selected_incentive)).price > 0
+        and Incentive.objects.get(pk=int(selected_incentive)).available_items > 0
         else False,
     )
     if (
         selected_incentive
         and contribution_amount >= incentive_obj.price
-        and Incentive.objects.get(pk=int(selected_incentive)).price > 0
+        and Incentive.objects.get(pk=int(selected_incentive)).available_items > 0
     ):
         Incentive.objects.filter(id=int(selected_incentive)).update(
             available_items=incentive_obj.available_items - 1,
@@ -98,7 +98,7 @@ def add_contribution_to_contribution_table(
         incentive_obj.title
         if selected_incentive
         and contribution_amount >= incentive_obj.price
-        and Incentive.objects.get(pk=int(selected_incentive)).price > 0
+        and Incentive.objects.get(pk=int(selected_incentive)).available_items > 0
         else False
     )
 
