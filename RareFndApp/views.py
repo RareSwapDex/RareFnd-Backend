@@ -979,6 +979,7 @@ def stripe_create_charge(request):
 @api_view(["POST"])
 def stripe_webhook(request):
     payload = request.body
+    print("1----------stripe_webhook", payload)
     sig_header = request.META["HTTP_STRIPE_SIGNATURE"]
     event = None
 
@@ -986,18 +987,23 @@ def stripe_webhook(request):
         event = stripe.Webhook.construct_event(
             payload, sig_header, STRIPE_WEBHOOK_SECRET
         )
+        print("2----------stripe_webhook", event)
     except ValueError as e:
         # Invalid payload
+        print("3----------stripe_webhook", ValueError)
         return HttpResponse(status=400)
     except stripe.error.SignatureVerificationError as e:
         # Invalid signature
+        print("4----------stripe_webhook", e)
         return HttpResponse(status=400)
     # check payment success
     if event.type == "payment_intent.succeeded":
+        print("5----------stripe_webhook", event.type)
         payment_intent = event.data.object  # contains a stripe.PaymentIntent
         payment_intent_id = payment_intent["id"]
         # Get checkout session related to this id
         c_s = stripe.checkout.Session.list(payment_intent=payment_intent_id)
+        print("6----------stripe_webhook", c_s)
         # Add contribution to "Contribution" table
         if not c_s["data"][0]["metadata"].get("project_id"):
             return Response(
@@ -1010,6 +1016,9 @@ def stripe_webhook(request):
         contributor_email = c_s["data"][0]["metadata"]["contributor_email"]
         contribution_amount = round(float(payment_intent["amount_received"] / 100), 2)
         selected_incentive = c_s["data"][0]["metadata"]["selected_incentive"]
+        print(
+            "7----------stripe_webhook", "add_contribution_to_contribution_table....."
+        )
         add_contribution_to_contribution_table(
             "0",
             contributor_email,
@@ -1019,13 +1028,17 @@ def stripe_webhook(request):
             "0",
             selected_incentive,
         )
+        print("8----------stripe_webhook", "add_contribution_to_contribution_table")
         # Add amount to project rased_amount
         reward = add_amount_to_project_raised_amount(project_id, contribution_amount)
+        print("9----------stripe_webhook", reward)
         # Send email to contributor
         send_contribution_email([contributor_email], reward, project_id)
+        print("10----------stripe_webhook", "send_contribution_email")
         # # Check if project reached target amount
         # check_project_reached_target(project_id)
         return Response({"message": "success"}, status=status.HTTP_200_OK)
+    print("11----------stripe_webhook", 'not event.type == "payment_intent.succeeded"')
     return Response(
         {"message": "not payment_intent.succeeded event (event which is not relevant)"},
         status=status.HTTP_200_OK,
