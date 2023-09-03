@@ -916,7 +916,9 @@ def coinbase_webhook(request):
         # Add amount to project rased_amount
         reward = add_amount_to_project_raised_amount(project_id, contribution_amount)
         # Send email to contributor
-        send_contribution_email([contributor_email], reward, project_id)
+        send_contribution_email(
+            [contributor_email], reward, project_id, contribution_amount
+        )
         # # Check if project reached target amount
         # check_project_reached_target(project_id)
         return Response({"message": "success"}, status=status.HTTP_200_OK)
@@ -1037,7 +1039,9 @@ def stripe_webhook(request):
         reward = add_amount_to_project_raised_amount(project_id, contribution_amount)
         print("9----------stripe_webhook", reward)
         # Send email to contributor
-        send_contribution_email([contributor_email], reward, project_id)
+        send_contribution_email(
+            [contributor_email], reward, project_id, contribution_amount
+        )
         print("10----------stripe_webhook", "send_contribution_email")
         # # Check if project reached target amount
         # check_project_reached_target(project_id)

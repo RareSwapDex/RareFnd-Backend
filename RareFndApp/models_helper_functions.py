@@ -103,7 +103,7 @@ def add_contribution_to_contribution_table(
     )
 
 
-def send_contribution_email(recipient_list, reward, project_id):
+def send_contribution_email(recipient_list, reward, project_id, contribution_amount):
     # Retrieve the project title using the project_id
     project = Project.objects.get(pk=project_id)
     project_title = project.title
