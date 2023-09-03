@@ -904,7 +904,7 @@ def coinbase_webhook(request):
         )
         contribution_hash = event["data"]["payments"][0]["transaction_id"]
         # Add contribution to "Contribution" table
-        add_contribution_to_contribution_table(
+        reward = add_contribution_to_contribution_table(
             "0",
             contributor_email,
             project_id,
@@ -913,8 +913,10 @@ def coinbase_webhook(request):
             contribution_hash,
             selected_incentive,
         )
-        # # Add amount to project rased_amount
-        # add_amount_to_project_raised_amount(project_id, contribution_amount)
+        # Add amount to project rased_amount
+        reward = add_amount_to_project_raised_amount(project_id, contribution_amount)
+        # Send email to contributor
+        send_contribution_email([contributor_email], reward, project_id)
         # # Check if project reached target amount
         # check_project_reached_target(project_id)
         return Response({"message": "success"}, status=status.HTTP_200_OK)
@@ -1006,7 +1008,7 @@ def stripe_webhook(request):
             )
         project_id = c_s["data"][0]["metadata"]["project_id"]
         contributor_email = c_s["data"][0]["metadata"]["contributor_email"]
-        contribution_amount = float(payment_intent["amount_received"] / 100)
+        contribution_amount = round(float(payment_intent["amount_received"] / 100), 2)
         selected_incentive = c_s["data"][0]["metadata"]["selected_incentive"]
         add_contribution_to_contribution_table(
             "0",
@@ -1017,8 +1019,10 @@ def stripe_webhook(request):
             "0",
             selected_incentive,
         )
-        # # Add amount to project rased_amount
-        # add_amount_to_project_raised_amount(project_id, contribution_amount)
+        # Add amount to project rased_amount
+        reward = add_amount_to_project_raised_amount(project_id, contribution_amount)
+        # Send email to contributor
+        send_contribution_email([contributor_email], reward, project_id)
         # # Check if project reached target amount
         # check_project_reached_target(project_id)
         return Response({"message": "success"}, status=status.HTTP_200_OK)

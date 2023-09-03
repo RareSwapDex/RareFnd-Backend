@@ -15,6 +15,19 @@ from .models import (
 )
 import random
 import string
+from django.core.mail import EmailMessage
+from django.conf import settings
+
+
+def backend_send_html_email(subject, message, email_from, recipient_list):
+    email = EmailMessage(
+        subject,
+        message,
+        email_from,
+        recipient_list,
+    )
+    email.content_subtype = "html"
+    email.send()
 
 
 def add_amount_to_project_raised_amount(project_id, amount):
@@ -80,3 +93,46 @@ def add_contribution_to_contribution_table(
         )
     c.clean()
     c.save()
+
+    return (
+        incentive_obj.title
+        if selected_incentive
+        and contribution_amount >= incentive_obj.price
+        and Incentive.objects.get(pk=int(selected_incentive)).price > 0
+        else False
+    )
+
+
+def send_contribution_email(recipient_list, reward, project_id):
+    # Retrieve the project title using the project_id
+    project = Project.objects.get(pk=project_id)
+    project_title = project.title
+
+    # Construct the reward message if it's not False
+    if reward:
+        reward_message = f"<p>As a token of appreciation, you'll be receiving the reward: <strong>{reward}</strong>.</p>"
+    else:
+        reward_message = ""
+
+    email_message = f"""
+    <html>
+    <body>
+    <p>Dear Contributor,</p>
+
+    <p>Thank you so much for your generous contribution to the project, <strong>{project_title}</strong>. Your contribution of <strong>{contribution_amount}</strong> is greatly appreciated and will go a long way in helping us achieve our goals.</p>
+
+    {reward_message}
+
+    <p>Your support means everything to us. We're excited to have you on board and will keep you updated on our progress. Together, we'll make this project a huge success!</p>
+
+    <p>Warm regards,<br>RareFND Team</p>
+    </body>
+    </html>
+    """
+
+    backend_send_html_email(
+        subject="Thank You for Your Contribution to RareFND!",
+        message=email_message,
+        email_from=settings.EMAIL_HOST_USER,
+        recipient_list=recipient_list,
+    )
