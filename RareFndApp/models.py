@@ -317,11 +317,12 @@ class Project(models.Model):
     @property
     def number_of_donators(self):
         # return len(Contribution.objects.filter(project=self))
-        return len(
-            Contribution.objects.filter(project=self)
-            .values("contributor_wallet_address")
-            .distinct()
-        )
+        # return len(
+        #     Contribution.objects.filter(project=self)
+        #     .values("contributor_wallet_address")
+        #     .distinct()
+        # )
+        return len(Contribution.objects.filter(project=self))
 
     def __str__(self):
         return self.title
